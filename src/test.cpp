@@ -29,6 +29,36 @@ using std::vector;
 
 using namespace bls;
 
+void TestHDKeySignature(){
+    const vector<uint8_t> message = {100, 2, 254, 88, 90, 45, 23};
+    const vector<uint8_t> farmer_seed(32, 0x07);
+    const vector<uint8_t> local_seed(32, 0x08);
+    const vector<uint8_t> skt_seed(32,0x09);
+    const PrivateKey farmer_sk = BasicSchemeMPL().KeyGen(farmer_seed); // farmer
+    const PrivateKey local_sk = BasicSchemeMPL().KeyGen(local_seed); // local
+    const PrivateKey skt_sk = BasicSchemeMPL().KeyGen(skt_seed);// skt sk
+    const PrivateKey agent_sk = PrivateKey::Aggregate({farmer_sk,skt_sk});// sk agent
+    const PrivateKey agent_all_sk = PrivateKey::Aggregate({farmer_sk,local_sk,skt_sk});
+    const G1Element agent_all_pk = agent_all_sk.GetG1Element();
+    const G1Element farmer_pk = farmer_sk.GetG1Element(); // farmer pk
+    const G1Element local_pk = local_sk.GetG1Element(); // local pk
+    const G1Element skt_pk = skt_sk.GetG1Element(); // skt pk
+    const G1Element aggPubKey = BasicSchemeMPL().Aggregate({farmer_pk,local_pk,skt_pk});
+    const G2Element sig_farmer= BasicSchemeMPL().Sign(farmer_sk, message);
+    const G2Element sig_local = BasicSchemeMPL().Sign(local_sk,message);
+    const G2Element sig_skt = BasicSchemeMPL().Sign(skt_sk, message);
+    const G2Element sig_agent = BasicSchemeMPL().Sign(agent_sk,message);
+    const G2Element sig_all_agent = BasicSchemeMPL().Sign(agent_all_sk,message);
+    const G2Element aggSig = BasicSchemeMPL().Aggregate({sig_farmer, sig_skt,sig_local});
+    const G2Element aggSig2 = BasicSchemeMPL().Aggregate({sig_agent,sig_local});
+    REQUIRE(agent_all_pk == aggPubKey);
+    REQUIRE(aggSig == aggSig2);
+    REQUIRE(aggSig == sig_all_agent);
+    // Verify as a single G2Element
+    REQUIRE(BasicSchemeMPL().Verify(aggPubKey, message, aggSig));
+    REQUIRE(BasicSchemeMPL().Verify(aggPubKey, message, aggSig2));
+}
+
 void TestHKDF(string ikm_hex, string salt_hex, string info_hex, string prk_expected_hex, string okm_expected_hex, int L) {
     vector<uint8_t> ikm = Util::HexToBytes(ikm_hex);
     vector<uint8_t> salt = Util::HexToBytes(salt_hex);
@@ -139,7 +169,14 @@ TEST_CASE("class PrivateKey") {
     }
 }
 
+TEST_CASE("") {
+    SECTION("Test HD key sig") {
+        TestHDKeySignature();
+    }
+}
+
 TEST_CASE("HKDF") {
+
     // https://tools.ietf.org/html/rfc5869 test vectors
     SECTION("Test case 2") {
         TestHKDF("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
