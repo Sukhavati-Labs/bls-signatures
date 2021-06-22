@@ -36,6 +36,8 @@ blstest
 blstest.*
 blsbench
 blsbench.*
+cmake-build-debug/
+build/
 
 .dirstamp
 .libs

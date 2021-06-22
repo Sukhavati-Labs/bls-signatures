@@ -1,8 +1,18 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.14 FATAL_ERROR)
 set (CMAKE_CXX_STANDARD 17)
 
+project(blsgo C CXX ASM)
+
+add_library(blsgo STATIC
+        wrappers/UtilWrapper.cpp
+        wrappers/UtilWrapper.h
+        gobindings.h
+        )
+
 include_directories(
         ${INCLUDE_DIRECTORIES}
+        ${CMAKE_BINARY_DIR}/_deps/relic-src/include
+        ${CMAKE_BINARY_DIR}/_deps/relic-build/include
         ${relic_SOURCE_DIR}/include
         ${relic_BINARY_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/../contrib/catch
@@ -11,8 +21,6 @@ include_directories(
 if (GMP_FOUND)
     include_directories(${GMP_INCLUDES})
 endif(GMP_FOUND)
-
-pybind11_add_module(blspy ${CMAKE_CURRENT_SOURCE_DIR}/pythonbindings.cpp)
 
 if (SODIUM_FOUND)
     set(BLSALLOC_SODIUM "1" CACHE STRING "")
