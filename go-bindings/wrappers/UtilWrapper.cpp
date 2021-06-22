@@ -21,3 +21,9 @@ const uint8_t * BytesWrapperBegin(BytesWrapper bytesWrapper){
     bls::Bytes *b = (bls::Bytes *) bytesWrapper;
     return b->begin();
 }
+
+uint8_t BytesWrapperIndex(BytesWrapper bytesWrapper,int index){
+    bls::Bytes *b = (bls::Bytes *) bytesWrapper;
+    uint8_t c = (*b)[index];
+    return c;
+}
