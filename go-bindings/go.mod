@@ -1,3 +1,2 @@
-module github.com/Chia-Network/bls-signatures/go-bindings
-
+module blsgo
 go 1.16
