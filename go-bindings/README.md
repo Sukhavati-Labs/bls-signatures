@@ -5,20 +5,8 @@ Use the full power and efficiency of the C++ bls library, but in a few lines of 
 ## Install
 
 ```bash
-go get github.com/Sukhavati-Labs/bls-signatures/go-bindings
+go get -u  github.com/Sukhavati-Labs/bls-signatures/go-bindings@go-bindings
 ```
-
-Alternatively, to install from source, run the following, in the project root directory:
-
-```bash
-pip3 install .
-```
-
-Cmake, a c++ compiler, and a recent version of pip3 (v18) are required for source install.
-GMP(speed) and libsodium(secure memory alloc) are optional dependencies.
-Public keys are G1Elements, and signatures are G2Elements.
-
-Then, to use:
 
 ## Import the library
 
