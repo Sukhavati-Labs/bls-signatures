@@ -12,13 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "relic.h"
+#include "relic_label.h"
 #include "PrivateKeyWrapper.h"
+#include "../src/privatekey.h"
+#include "../../src/util.hpp"
+#include "../../src/privatekey.hpp"
 
-PrivateWrapper PrivateKeyWrapperInit(const bls::PrivateKey *privateKey){
-    return (void *)privateKey;
+PrivateWrapper PrivateKeyWrapperFromBytes(const uint8_t *buffer,size_t size){
+    bls::Bytes b bls::Bytes(buffer,size);
+    bls::PrivateKey *privateKey = new bls::PrivateKey(bls::PrivateKey::FromBytes(b));
+    return (void *)(privateKey);
 }
 
-
-PrivateWrapper PrivateKeyWrapperFromBytes(const char *buffer,int size){
-    bls::PrivateKey::FromBytes()
+void PrivateKeyWrapperFree(PrivateKeyWrapper privateKeyWrapper){
+    bls::PrivateKey *privateKey = (bls::PrivateKey*) privateKeyWrapper;
+    delete privateKey;
 }

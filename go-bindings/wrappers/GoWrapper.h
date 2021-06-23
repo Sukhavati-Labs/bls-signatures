@@ -13,12 +13,9 @@
 // limitations under the License.
 
 
-#ifndef BLS_GO_WRAPPER_H
-#define BLS_GO_WRAPPER_H
-
-extern "C" {
+#ifndef BLS_GO_BINDINGS_GO_WRAPPER_H
+#define BLS_GO_BINDINGS_GO_WRAPPER_H
 #include "relic.h"
-}
 #include "../../src/bls.hpp"
 
 
@@ -27,4 +24,4 @@ typedef void *t##Wrapper;\
 t##Wrapper t##WrapperInit(const &t);\
 void t##WrapperFree(const &t);\
 
-#endif  // BLS_GO_WRAPPER_H
+#endif  // BLS_GO_BINDINGS_GO_WRAPPER_H

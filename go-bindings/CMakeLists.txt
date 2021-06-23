@@ -6,8 +6,17 @@ project(blsgo C CXX ASM)
 add_library(blsgo STATIC
         wrappers/UtilWrapper.cpp
         wrappers/UtilWrapper.h
-        gobindings.h
-        )
+        wrappers/SchemeMPLWrapper.cpp
+        wrappers/SchemeMPLWrapper.h
+        gobindings.c
+        wrappers/BignumWrapper.cpp
+        wrappers/BignumWrapper.h
+        wrappers/G1ElementWrapper.cpp
+        wrappers/G1ElementWrapper.h
+        wrappers/G2ElementWrapper.cpp
+        wrappers/G2ElementWrapper.h
+        wrappers/BytesWrapper.cpp
+        wrappers/BytesWrapper.h)
 
 include_directories(
         ${INCLUDE_DIRECTORIES}
@@ -25,7 +34,7 @@ endif(GMP_FOUND)
 if (SODIUM_FOUND)
     set(BLSALLOC_SODIUM "1" CACHE STRING "")
     set(SODIUM_STATIC "1" CACHE STRING "")
-    target_link_libraries(blsgo PRIVATE blstmp relic_s sodium)
+    target_link_libraries(blsgo blstmp relic_s sodium)
 else()
-    target_link_libraries(blsgo PRIVATE blstmp relic_s)
+    target_link_libraries(blsgo blstmp relic_s)
 endif()

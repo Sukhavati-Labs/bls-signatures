@@ -1,5 +1,4 @@
 // Copyright 2020 Chia Network Inc
-
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,16 +12,21 @@
 // limitations under the License.
 
 
-#ifndef BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H
-#define BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H
+#ifndef BLS_GO_BINDINGS_SCHEME_MPL_WRAPPER_H
+#define BLS_GO_BINDINGS_SCHEME_MPL_WRAPPER_H
+
 #include <stdint.h>
 #include <stddef.h>
+#include "PrivateKeyWrapper.h"
 
-typedef void *PrivateKeyWrapper;
+typedef void * BasicSchemeMPLWrapper;
+BasicSchemeMPLWrapper BasicSchemeMPLWrapperInit();
 
-PrivateKeyWrapper PrivateKeyWrapperFromBytes(const uint8_t *buffer,size_t size);
+PrivateKeyWrapper BasicSchemeMPLWrapperGenKey(
+    BasicSchemeMPLWrapper basicScheme,
+    const uint8_t * seed,size_t size);
 
-void PrivateKeyWrapperFree(PrivateKeyWrapper privateKeyWrapper);
+typedef void * AugSchemeMPLWrapper;
+AugSchemeMPLWrapper AugSchemeMPLWrapperInit();
 
-
-#endif  // BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H
+#endif  // BLS_GO_BINDINGS_SCHEME_MPL_WRAPPER_H
