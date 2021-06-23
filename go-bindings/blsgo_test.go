@@ -6,10 +6,12 @@ import (
 	"testing"
 )
 
+// TTestBLSBytesSize
 func TestBLSBytesSize(t *testing.T) {
 	message := []byte("1234567890")
 	messageLen := len(message)
 	blsBytes := NewBLSBytesFromBytes(message)
+	defer blsBytes.Free()
 	blsBytesSize := blsBytes.Size()
 	if blsBytesSize != messageLen {
 		t.Errorf("message size:%d != blsBytes size:%d", messageLen, blsBytesSize)
@@ -46,3 +48,18 @@ func TestBLSBytesIndex(t *testing.T) {
 		}
 	}
 }
+
+func TestNewG1ElementFromBytes(t *testing.T) {
+
+}
+
+//func TestBasicSchemeMPL(t *testing.T){
+//    basic := NewBasicSchemeMPL()
+//    seed := []byte{
+//    	1,2,3,4,5,6,7,8,
+//		1,2,3,4,5,6,7,8,
+//		1,2,3,4,5,6,7,8,
+//		1,2,3,4,5,6,7,8,
+//    }
+//    basic.KeyGen(seed)
+//}

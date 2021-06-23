@@ -13,16 +13,4 @@
 // limitations under the License.
 
 
-#ifndef BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H
-#define BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H
-#include <stdint.h>
-#include <stddef.h>
-
-typedef void *PrivateKeyWrapper;
-
-PrivateKeyWrapper PrivateKeyWrapperFromBytes(const uint8_t *buffer,size_t size);
-
-void PrivateKeyWrapperFree(PrivateKeyWrapper privateKeyWrapper);
-
-
-#endif  // BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H
+#include "G2ElementWrapper.h"

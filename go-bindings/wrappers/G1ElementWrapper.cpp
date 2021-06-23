@@ -12,4 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "relic.h"
+#include "../../src/elements.hpp"
 #include "G1ElementWrapper.h"
+#include "../../src/util.hpp"
+#include "../../src/bls.hpp"
+
+G1ElementWrapper G1ElementWrapperFromBytes(const BytesWrapper bytesWrapper){
+    bls::Bytes *b = (bls::Bytes *) bytesWrapper;
+    bls::G1Element g1 = bls::G1Element::FromBytes(*b);
+    return (void *)(&g1);
+}

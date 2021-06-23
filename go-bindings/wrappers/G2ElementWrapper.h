@@ -13,16 +13,20 @@
 // limitations under the License.
 
 
-#ifndef BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H
-#define BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H
+#ifndef BLS_GO_BINDINGS_G2_ELEMENT_WRAPPER_H
+#define BLS_GO_BINDINGS_G2_ELEMENT_WRAPPER_H
+
 #include <stdint.h>
 #include <stddef.h>
+#include "BytesWrapper.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+typedef void *G2ElementWrapper;
+G2ElementWrapper G2ElementWrapperFromBytes(const BytesWrapper bytesWrapper);
+void G2ElementWrapperFree(G2ElementWrapper g2ElementWrapper);
+#ifdef __cplusplus
+}
+#endif
 
-typedef void *PrivateKeyWrapper;
-
-PrivateKeyWrapper PrivateKeyWrapperFromBytes(const uint8_t *buffer,size_t size);
-
-void PrivateKeyWrapperFree(PrivateKeyWrapper privateKeyWrapper);
-
-
-#endif  // BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H
+#endif  // BLS_GO_BINDINGS_G2_ELEMENT_WRAPPER_H
