@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "wrappers/BytesWrapper.h"
-#include "wrappers/ElementWrapper.h"
 #include "wrappers/PrivateKeyWrapper.h"
 #include "wrappers/SchemeMPLWrapper.h"
 #include "wrappers/UtilWrapper.h"

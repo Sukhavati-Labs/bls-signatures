@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "PrivateKeyWrapper.h"
+#include "BytesWrapper.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -26,6 +27,12 @@ typedef void * BasicSchemeMPLWrapper;
 BasicSchemeMPLWrapper BasicSchemeMPLWrapperInit();
 
 PrivateKeyWrapper BasicSchemeMPLWrapperGenKey(BasicSchemeMPLWrapper basicScheme,const uint8_t * seed,size_t size);
+
+BytesWrapper BasicSchemeMPLWrapperAggregateG1Element(BasicSchemeMPLWrapper basicScheme,const BytesWrapper * pubKeys,int num);
+
+BytesWrapper BasicSchemeMPLWrapperSign(BasicSchemeMPLWrapper basicScheme,PrivateKeyWrapper privateKeyWrapper,const uint8_t * message,size_t size);
+
+int BasicSchemeMPLWrapperVerify(BasicSchemeMPLWrapper basicScheme,BytesWrapper publicKeyBytes,const uint8_t * message,size_t size,BytesWrapper signatureBytes);
 
 typedef void * AugSchemeMPLWrapper;
 

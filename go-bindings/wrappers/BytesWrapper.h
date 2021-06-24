@@ -21,7 +21,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-typedef void *BytesWrapper;
+typedef void * BytesWrapper;
 BytesWrapper BytesWrapperInit(const uint8_t *buffer, size_t bufferSize);
 void BytesWrapperFree(BytesWrapper bytesWrapper);
 size_t BytesWrapperSize(BytesWrapper bytesWrapper);

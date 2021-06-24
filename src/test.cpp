@@ -30,16 +30,20 @@ using std::vector;
 using namespace bls;
 
 void TestHDKeySignature(){
+    cout << "TestHDKeySignature start " << endl;
     const vector<uint8_t> message = {100, 2, 254, 88, 90, 45, 23};
     const vector<uint8_t> farmer_seed(32, 0x07);
     const vector<uint8_t> local_seed(32, 0x08);
     const vector<uint8_t> skt_seed(32,0x09);
     const PrivateKey farmer_sk = BasicSchemeMPL().KeyGen(farmer_seed); // farmer
+    cout << "farmer sk:"<<Util::HexStr(farmer_sk.Serialize())<<endl;
+    cout << "farmer pk:"<<Util::HexStr(farmer_sk.GetG1Element().Serialize()) << endl;
     const PrivateKey local_sk = BasicSchemeMPL().KeyGen(local_seed); // local
     const PrivateKey skt_sk = BasicSchemeMPL().KeyGen(skt_seed);// skt sk
     const PrivateKey agent_sk = PrivateKey::Aggregate({farmer_sk,skt_sk});// sk agent
     const PrivateKey agent_all_sk = PrivateKey::Aggregate({farmer_sk,local_sk,skt_sk});
     const G1Element agent_all_pk = agent_all_sk.GetG1Element();
+    cout << Util::HexStr(agent_all_pk.Serialize()) << endl;
     const G1Element farmer_pk = farmer_sk.GetG1Element(); // farmer pk
     const G1Element local_pk = local_sk.GetG1Element(); // local pk
     const G1Element skt_pk = skt_sk.GetG1Element(); // skt pk
@@ -54,9 +58,11 @@ void TestHDKeySignature(){
     REQUIRE(agent_all_pk == aggPubKey);
     REQUIRE(aggSig == aggSig2);
     REQUIRE(aggSig == sig_all_agent);
+    bls::G1Element::FromBytes(bls::Bytes(aggPubKey.Serialize())) ;
     // Verify as a single G2Element
     REQUIRE(BasicSchemeMPL().Verify(aggPubKey, message, aggSig));
     REQUIRE(BasicSchemeMPL().Verify(aggPubKey, message, aggSig2));
+    cout << "TestHDKeySignature end" << endl;
 }
 
 void TestHKDF(string ikm_hex, string salt_hex, string info_hex, string prk_expected_hex, string okm_expected_hex, int L) {
