@@ -17,6 +17,7 @@
 #define BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H
 #include <stdint.h>
 #include <stddef.h>
+#include "BytesWrapper.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,7 +31,10 @@ int PrivateKeyWrapperIsZero(PrivateKeyWrapper privateKeyWrapper);
 
 PrivateKeyWrapper PrivateKeyWrapperAggregate(const PrivateKeyWrapper *keys,int num);
 
-uint8_t* PrivateKeyWrapperSerialize(PrivateKeyWrapper privateKeyWrapper);
+BytesWrapper PrivateKeyWrapperSerialize(PrivateKeyWrapper privateKeyWrapper);
+
+BytesWrapper PrivateKeyWrapperGetG1Element(PrivateKeyWrapper privateKeyWrapper);
+
 
 #ifdef __cplusplus
 }

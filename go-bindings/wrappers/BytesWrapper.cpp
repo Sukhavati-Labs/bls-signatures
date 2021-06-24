@@ -18,7 +18,7 @@
 
 BytesWrapper BytesWrapperInit(const uint8_t * buffer ,size_t bufferSize){
     bls::Bytes * bytesWrapper =  new bls::Bytes(buffer,bufferSize);
-    return (void *)bytesWrapper;
+    return reinterpret_cast<void *>(bytesWrapper);
 }
 
 void BytesWrapperFree(BytesWrapper bytesWrapper){

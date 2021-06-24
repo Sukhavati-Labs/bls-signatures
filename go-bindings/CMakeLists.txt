@@ -11,10 +11,8 @@ add_library(blsgo STATIC
         wrappers/SchemeMPLWrapper.cpp
         wrappers/SchemeMPLWrapper.h
         gobindings.h
-        wrappers/ElementWrapper.cpp
-        wrappers/ElementWrapper.h
         wrappers/BytesWrapper.cpp
-        wrappers/BytesWrapper.h)
+        wrappers/BytesWrapper.h wrappers/ElementWrapper.cpp wrappers/ElementWrapper.h)
 
 include_directories(
         ${INCLUDE_DIRECTORIES}

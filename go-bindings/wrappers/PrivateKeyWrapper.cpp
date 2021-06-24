@@ -48,11 +48,23 @@ PrivateKeyWrapper PrivateKeyWrapperAggregate(const PrivateKeyWrapper *keys,int n
     return  reinterpret_cast<void*>(augKey);
 }
 
-uint8_t* PrivateKeyWrapperSerialize(PrivateKeyWrapper privateKeyWrapper){
+BytesWrapper PrivateKeyWrapperSerialize(PrivateKeyWrapper privateKeyWrapper){
     bls::PrivateKey *key = reinterpret_cast<bls::PrivateKey*>(privateKeyWrapper);
-    std::vector<uint8_t> buffer = (*key).Serialize();
-    uint8_t *b = (uint8_t*)malloc(buffer.size()+1);
-    memcpy(b,buffer.data(),32);
-    return b;
+    //bls::Bytes *bytes = new bls::Bytes((*key).Serialize());
+    auto sigBytes = (*key).Serialize();
+    uint8_t * n = (uint8_t*)malloc(sigBytes.size());
+    memcpy(n,sigBytes.data(),sigBytes.size());
+    bls::Bytes *bytes = new bls::Bytes(n,sigBytes.size());
+    return (BytesWrapper)(bytes);
 }
 
+BytesWrapper PrivateKeyWrapperGetG1Element(PrivateKeyWrapper privateKeyWrapper){
+    bls::PrivateKey *key = (bls::PrivateKey*)(privateKeyWrapper);
+    bls::G1Element publicKey = (*key).GetG1Element();
+    auto sigBytes = publicKey.Serialize();
+    uint8_t * n = (uint8_t*)malloc(sigBytes.size());
+    memcpy(n,sigBytes.data(),sigBytes.size());
+    bls::Bytes *bytes = new bls::Bytes(n,sigBytes.size());
+    //bls::Bytes *bytes = new bls::Bytes(publicKey.Serialize());
+    return (BytesWrapper)(bytes);
+}
