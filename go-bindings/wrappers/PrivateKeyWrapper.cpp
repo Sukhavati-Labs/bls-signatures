@@ -15,17 +15,44 @@
 #include "relic.h"
 #include "relic_label.h"
 #include "PrivateKeyWrapper.h"
-#include "../src/privatekey.h"
 #include "../../src/util.hpp"
 #include "../../src/privatekey.hpp"
 
-PrivateWrapper PrivateKeyWrapperFromBytes(const uint8_t *buffer,size_t size){
-    bls::Bytes b bls::Bytes(buffer,size);
-    bls::PrivateKey *privateKey = new bls::PrivateKey(bls::PrivateKey::FromBytes(b));
-    return (void *)(privateKey);
+PrivateKeyWrapper PrivateKeyWrapperFromBytes(const uint8_t *buffer,size_t size){
+    std::vector<uint8_t>b(buffer,buffer+size);
+    bls::PrivateKey *privateKey = new bls::PrivateKey(bls::PrivateKey::FromByteVector(b));
+    return reinterpret_cast<void *>(privateKey);
 }
 
 void PrivateKeyWrapperFree(PrivateKeyWrapper privateKeyWrapper){
     bls::PrivateKey *privateKey = (bls::PrivateKey*) privateKeyWrapper;
     delete privateKey;
 }
+
+int PrivateKeyWrapperIsZero(PrivateKeyWrapper privateKeyWrapper){
+    bls::PrivateKey *privateKey = (bls::PrivateKey*) privateKeyWrapper;
+    if ((*privateKey).IsZero()){
+       return 1;
+    }
+    return 0;
+}
+
+PrivateKeyWrapper PrivateKeyWrapperAggregate(const PrivateKeyWrapper *keys,int num){
+    bls::PrivateKey **keyList =  (bls::PrivateKey**) keys;
+    std::vector<bls::PrivateKey>keyVec;
+    for (int i=0;i<num ;i++){
+        bls::PrivateKey *key = keyList[i];
+        keyVec.push_back(*key);
+    }
+    bls::PrivateKey *augKey = new bls::PrivateKey(bls::PrivateKey::Aggregate(keyVec));
+    return  reinterpret_cast<void*>(augKey);
+}
+
+uint8_t* PrivateKeyWrapperSerialize(PrivateKeyWrapper privateKeyWrapper){
+    bls::PrivateKey *key = reinterpret_cast<bls::PrivateKey*>(privateKeyWrapper);
+    std::vector<uint8_t> buffer = (*key).Serialize();
+    uint8_t *b = (uint8_t*)malloc(buffer.size()+1);
+    memcpy(b,buffer.data(),32);
+    return b;
+}
+

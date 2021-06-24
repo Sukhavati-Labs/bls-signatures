@@ -53,13 +53,63 @@ func TestNewG1ElementFromBytes(t *testing.T) {
 
 }
 
-//func TestBasicSchemeMPL(t *testing.T){
-//    basic := NewBasicSchemeMPL()
-//    seed := []byte{
-//    	1,2,3,4,5,6,7,8,
-//		1,2,3,4,5,6,7,8,
-//		1,2,3,4,5,6,7,8,
-//		1,2,3,4,5,6,7,8,
-//    }
-//    basic.KeyGen(seed)
-//}
+func TestBasicSchemeMPL_KeyGen(t *testing.T) {
+	basic := NewBasicSchemeMPL()
+	seed := []byte{
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+	}
+	privateKey, err := basic.KeyGen(seed)
+	if err != nil {
+		t.FailNow()
+	}
+	if privateKey.IsZero() {
+		t.Errorf("privateKey is zero ")
+	}
+	println(hex.EncodeToString(privateKey.Bytes()))
+	if privateKey == nil {
+		t.FailNow()
+	}
+}
+
+func TestPrivateKeyAggregate(t *testing.T) {
+	basic := NewBasicSchemeMPL()
+	seed1 := []byte{
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+	}
+	seed2 := []byte{
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+	}
+	seed3 := []byte{
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+	}
+	privateKey1, err := basic.KeyGen(seed1)
+	if err != nil {
+		t.FailNow()
+	}
+	println("privateKey1:%s", hex.EncodeToString(privateKey1.Bytes()))
+	privateKey2, err := basic.KeyGen(seed2)
+	if err != nil {
+		t.FailNow()
+	}
+	println("privateKey2:%s", hex.EncodeToString(privateKey2.Bytes()))
+	privateKey3, err := basic.KeyGen(seed3)
+	if err != nil {
+		t.FailNow()
+	}
+	println("privateKey3:%s", hex.EncodeToString(privateKey3.Bytes()))
+	keys := []*PrivateKey{privateKey1, privateKey2, privateKey3}
+	augKey := PrivateKeyAggregate(keys)
+	println("augKey:%s", hex.EncodeToString(augKey.Bytes()))
+}
