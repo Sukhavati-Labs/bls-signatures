@@ -1,10 +1,21 @@
 package blsgo
 
 /*
-#cgo CFLAGS: -I ../build/_deps/relic-build/include -I ../build/_deps/relic-src/include -I ../build/go-bindings
-#cgo CXXFLAGS: -I ../build/_deps/relic-src/include -I ../build/go-bindings -I ../build/_deps/relic-build/include  -I /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1
-#cgo darwin LDFLAGS: -L/usr/lib -L ../build/_deps/relic-build/lib -L ../build  -L ../build/src -L ../build/go-bindings -lstdc++ -lbls -lblstmp -lblsgo -lrelic_s
-#include "gobindings.c"
+#cgo CFLAGS: -I ../build/_deps/relic-build/include
+#cgo CFLAGS: -I ../build/_deps/relic-src/include
+#cgo CFLAGS: -I ../build/go-bindings
+#cgo CXXFLAGS: -I ../build/_deps/relic-src/include
+#cgo CXXFLAGS: -I ../build/go-bindings
+#cgo CXXFLAGS: -I ../build/_deps/relic-build/include
+#cgo darwin CXXFLAGS: -I /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1
+#cgo linux LDFLAGS: -L/usr/lib
+#cgo darwin LDFLAGS: -L/usr/lib
+#cgo LDFLAGS: -L ../build/_deps/relic-build/lib
+#cgo LDFLAGS: -L ../build
+#cgo LDFLAGS: -L ../build/src
+#cgo LDFLAGS: -L ../build/go-bindings
+#cgo LDFLAGS: -lstdc++ -lbls -lblstmp -lblsgo -lrelic_s
+#include "gobindings.h"
 #include <stdlib.h>
 */
 import "C"
@@ -65,7 +76,30 @@ type PrivateKey struct {
 	instance C.PrivateKeyWrapper
 }
 
-// G1Element g1 element
+func (sk *PrivateKey) IsZero() bool {
+	zero := C.PrivateKeyWrapperIsZero(sk.instance)
+	return zero == 1
+}
+
+func (sk *PrivateKey) Bytes() []byte {
+	b := unsafe.Pointer(C.PrivateKeyWrapperSerialize(sk.instance))
+	defer C.free(b)
+	return C.GoBytes(b, C.int(32))
+}
+
+func PrivateKeyAggregate(privateKeys []*PrivateKey) *PrivateKey {
+	num := len(privateKeys)
+	privKeys := make([]C.PrivateKeyWrapper, num)
+	for i, k := range privateKeys {
+		privKeys[i] = (*k).instance
+	}
+	augKey := C.PrivateKeyWrapperAggregate((*C.PrivateKeyWrapper)(unsafe.Pointer(&privKeys[0])), C.int(num))
+	return &PrivateKey{
+		instance: augKey,
+	}
+}
+
+//G1Element g1 element
 type G1Element struct {
 	instance C.G1ElementWrapper
 }
@@ -73,9 +107,8 @@ type G1Element struct {
 func NewG1ElementFromBytes(buffer []byte) *G1Element {
 	size := len(buffer)
 	cBuffer := (*C.uint8_t)(C.CBytes(buffer))
-	blsBytes := C.BytesWrapperInit(cBuffer, C.size_t(size))
 	g1 := &G1Element{
-		instance: C.G1ElementWrapperFromBytes(blsBytes),
+		instance: C.G1ElementWrapperFromBytes(cBuffer, C.size_t(size)),
 	}
 	return g1
 }
@@ -96,15 +129,18 @@ func NewBasicSchemeMPL() *BasicSchemeMPL {
 	return basicScheme
 }
 
-//func (bs *BasicSchemeMPL) KeyGen(seed []byte)*PrivateKey{
-//     size := len(seed)
-//	 cBuffer := (*C.uint8_t)(C.CBytes(seed))
-//	 var privateKeyWrapper C.PrivateKeyWrapper = C.BasicSchemeMPLWrapperGenKey(bs.instance,cBuffer,C.size_t(size))
-//	 privateKey := &PrivateKey{
-//	    instance: privateKeyWrapper,
-//	 }
-//	 return privateKey
-//}
+func (bs *BasicSchemeMPL) KeyGen(seed []byte) (*PrivateKey, error) {
+	size := len(seed)
+	if size < 32 {
+		return nil, fmt.Errorf("seed size must >= 32")
+	}
+	cBuffer := (*C.uint8_t)(C.CBytes(seed))
+	var privateKeyWrapper C.PrivateKeyWrapper = C.BasicSchemeMPLWrapperGenKey(bs.instance, cBuffer, C.size_t(size))
+	privateKey := &PrivateKey{
+		instance: privateKeyWrapper,
+	}
+	return privateKey, nil
+}
 
 type AugSchemeMPL struct {
 	instance C.AugSchemeMPLWrapper

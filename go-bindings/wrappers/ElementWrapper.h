@@ -12,5 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef BLS_GO_BINDINGS_G1ELEMENT_WRAPPER_H
+#define BLS_GO_BINDINGS_G1ELEMENT_WRAPPER_H
 
-#include "G2ElementWrapper.h"
+#include <stdint.h>
+#include <stddef.h>
+#include "BytesWrapper.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+typedef void *G1ElementWrapper;
+typedef void *G2ElementWrapper;
+
+G1ElementWrapper G1ElementWrapperFromBytes(const uint8_t *buffer,size_t size);
+#ifdef __cplusplus
+}
+#endif
+
+#endif  // BLS_GO_BINDINGS_G1ELEMENT_WRAPPER_H

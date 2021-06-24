@@ -18,15 +18,19 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "PrivateKeyWrapper.h"
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef void * BasicSchemeMPLWrapper;
+
 BasicSchemeMPLWrapper BasicSchemeMPLWrapperInit();
 
-PrivateKeyWrapper BasicSchemeMPLWrapperGenKey(
-    BasicSchemeMPLWrapper basicScheme,
-    const uint8_t * seed,size_t size);
+PrivateKeyWrapper BasicSchemeMPLWrapperGenKey(BasicSchemeMPLWrapper basicScheme,const uint8_t * seed,size_t size);
 
 typedef void * AugSchemeMPLWrapper;
-AugSchemeMPLWrapper AugSchemeMPLWrapperInit();
 
+AugSchemeMPLWrapper AugSchemeMPLWrapperInit();
+#ifdef __cplusplus
+}
+#endif
 #endif  // BLS_GO_BINDINGS_SCHEME_MPL_WRAPPER_H

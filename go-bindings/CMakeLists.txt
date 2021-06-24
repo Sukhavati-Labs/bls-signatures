@@ -6,15 +6,13 @@ project(blsgo C CXX ASM)
 add_library(blsgo STATIC
         wrappers/UtilWrapper.cpp
         wrappers/UtilWrapper.h
+        wrappers/PrivateKeyWrapper.h
+        wrappers/PrivateKeyWrapper.cpp
         wrappers/SchemeMPLWrapper.cpp
         wrappers/SchemeMPLWrapper.h
-        gobindings.c
-        wrappers/BignumWrapper.cpp
-        wrappers/BignumWrapper.h
-        wrappers/G1ElementWrapper.cpp
-        wrappers/G1ElementWrapper.h
-        wrappers/G2ElementWrapper.cpp
-        wrappers/G2ElementWrapper.h
+        gobindings.h
+        wrappers/ElementWrapper.cpp
+        wrappers/ElementWrapper.h
         wrappers/BytesWrapper.cpp
         wrappers/BytesWrapper.h)
 

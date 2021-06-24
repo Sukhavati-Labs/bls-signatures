@@ -11,15 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-#include "relic.h"
 #include "SchemeMPLWrapper.h"
+
+#include "../../src/schemes.hpp"
 #include "PrivateKeyWrapper.h"
-#include "../../src/bls.hpp"
+
 
 BasicSchemeMPLWrapper BasicSchemeMPLWrapperInit(){
    bls::BasicSchemeMPL *basicSchemeMpl = new bls::BasicSchemeMPL();
-   return (void*)basicSchemeMpl;
+   return (void*)(basicSchemeMpl);
 }
 
 PrivateKeyWrapper BasicSchemeMPLWrapperGenKey(BasicSchemeMPLWrapper basicScheme,const uint8_t * seedBuffer,size_t size){
@@ -31,5 +31,5 @@ PrivateKeyWrapper BasicSchemeMPLWrapperGenKey(BasicSchemeMPLWrapper basicScheme,
 
 AugSchemeMPLWrapper AugSchemeMPLWrapperInit(){
     bls::AugSchemeMPL *augSchemeMpl = new bls::AugSchemeMPL();
-    return (void*)augSchemeMpl;
+    return (void*)(augSchemeMpl);
 }

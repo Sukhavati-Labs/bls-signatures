@@ -12,16 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "ElementWrapper.h"
 
-#ifndef BLS_GO_BINDINGS_GO_WRAPPER_H
-#define BLS_GO_BINDINGS_GO_WRAPPER_H
-#include "relic.h"
 #include "../../src/bls.hpp"
+#include "../../src/elements.hpp"
+#include "relic.h"
 
-
-#define GO_WRAPPER(t) \
-typedef void *t##Wrapper;\
-t##Wrapper t##WrapperInit(const &t);\
-void t##WrapperFree(const &t);\
-
-#endif  // BLS_GO_BINDINGS_GO_WRAPPER_H
+G1ElementWrapper G1ElementWrapperFromBytes(const uint8_t *buffer,size_t size){
+    std::vector<uint8_t> bytes = std::vector<uint8_t>(buffer,buffer+size);
+    bls::G1Element g1 = bls::G1Element::FromByteVector(bytes);
+    return (void *)(&g1);
+}

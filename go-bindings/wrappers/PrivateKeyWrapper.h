@@ -17,12 +17,22 @@
 #define BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H
 #include <stdint.h>
 #include <stddef.h>
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef void *PrivateKeyWrapper;
 
 PrivateKeyWrapper PrivateKeyWrapperFromBytes(const uint8_t *buffer,size_t size);
 
 void PrivateKeyWrapperFree(PrivateKeyWrapper privateKeyWrapper);
 
+int PrivateKeyWrapperIsZero(PrivateKeyWrapper privateKeyWrapper);
 
+PrivateKeyWrapper PrivateKeyWrapperAggregate(const PrivateKeyWrapper *keys,int num);
+
+uint8_t* PrivateKeyWrapperSerialize(PrivateKeyWrapper privateKeyWrapper);
+
+#ifdef __cplusplus
+}
+#endif
 #endif  // BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H

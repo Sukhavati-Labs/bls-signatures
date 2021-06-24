@@ -15,7 +15,13 @@
 
 #ifndef BLS_GO_BINDINGS_UTIL_WRAPPER_H
 #define BLS_GO_BINDINGS_UTIL_WRAPPER_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+#ifdef __cplusplus
+}
+#endif
 #endif //BLS_GO_BINDINGS_UTIL_WRAPPER_H
 
 
