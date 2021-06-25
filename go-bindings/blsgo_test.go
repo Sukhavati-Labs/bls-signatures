@@ -69,24 +69,24 @@ func TestBasicSchemeMPL_KeyGen(t *testing.T) {
 	if privateKey.IsZero() {
 		t.Errorf("privateKey is zero ")
 	}
-	println("privateKey:",privateKey.String())
+	println("privateKey:", privateKey.String())
 	if privateKey == nil {
 		t.FailNow()
 	}
 	publicKey := privateKey.GetG1Element()
-	println("publicKey:",publicKey.String())
+	println("publicKey:", publicKey.String())
 }
 
-func TestBasicSchemeMPL_PrivateKey(t *testing.T){
-    privateKeyStr:="3c53d31475bc12996a186f5173b2f63c32a23110fa44aa9415c7c2749d84be47"
-    publicKeyStr := "92ebd66f33821b10060dacfd49737684a22ed41373b162f5823ccca9bb1ccdb24390c66658a4bbd6ff5781ac23936217"
+func TestBasicSchemeMPL_PrivateKey(t *testing.T) {
+	privateKeyStr := "3c53d31475bc12996a186f5173b2f63c32a23110fa44aa9415c7c2749d84be47"
+	publicKeyStr := "92ebd66f33821b10060dacfd49737684a22ed41373b162f5823ccca9bb1ccdb24390c66658a4bbd6ff5781ac23936217"
 	privateKeyBytes, err := hex.DecodeString(privateKeyStr)
 	if err != nil {
 		t.FailNow()
 	}
 	privateKey := NewPrivateKeyFromBytes(privateKeyBytes)
 	pubKey := privateKey.GetG1Element()
-	fmt.Printf("private key --> public key \nwant: %s \ngive: %s\n",publicKeyStr,pubKey.String() )
+	fmt.Printf("private key --> public key \nwant: %s \ngive: %s\n", publicKeyStr, pubKey.String())
 	if pubKey.String() != publicKeyStr {
 		t.FailNow()
 	}
@@ -94,6 +94,12 @@ func TestBasicSchemeMPL_PrivateKey(t *testing.T){
 	if privateKey2.String() != privateKeyStr {
 		t.FailNow()
 	}
+	basic := NewBasicSchemeMPL()
+	sign, err := basic.Sign(privateKey, []byte{})
+	if err != nil {
+		t.FailNow()
+	}
+	println("sign:", sign.String())
 
 }
 
@@ -126,7 +132,7 @@ func TestPrivateKeyAggregate(t *testing.T) {
 		t.FailNow()
 	}
 	println("privateKey1:", privateKey1.String())
-	println("publicKey1:",privateKey1.GetG1Element().String())
+	println("publicKey1:", privateKey1.GetG1Element().String())
 	privateKey2, err := basic.KeyGen(seed2)
 	if err != nil {
 		t.FailNow()
@@ -136,34 +142,34 @@ func TestPrivateKeyAggregate(t *testing.T) {
 	if err != nil {
 		t.FailNow()
 	}
-	message := []byte{1,2,3}
-	println("privateKey3:",privateKey3.String())
-	augKey12 := PrivateKeyAggregate([]*PrivateKey{privateKey1,privateKey2})
-	println("augKey12:",augKey12.String())
+	message := []byte{1, 2, 3}
+	println("privateKey3:", privateKey3.String())
+	augKey12 := PrivateKeyAggregate([]*PrivateKey{privateKey1, privateKey2})
+	println("augKey12:", augKey12.String())
 	pubKey12 := augKey12.GetG1Element()
-	println("pubKey12:",pubKey12.String())
+	println("pubKey12:", pubKey12.String())
 	sign, err := basic.Sign(privateKey1, message)
 	if err != nil {
-	   t.FailNow()
+		t.FailNow()
 	}
 	println("----------------------------------------------")
-	println("sign:",sign.String())
-	println("publicKey:",privateKey1.GetG1Element().String())
-// 	for i:=0;i<100;i++{
-// 		sign, _ := basic.Sign(privateKey1, message)
-// 		println("sign:",sign.String())
-// 		println("publicKey:",privateKey1.GetG1Element().String())
-// 		println("sign:",sign.String())
-// 	}
-	if !basic.Verify(privateKey1.GetG1Element(),message,sign) {
+	println("sign:", sign.String())
+	println("publicKey:", privateKey1.GetG1Element().String())
+	// 	for i:=0;i<100;i++{
+	// 		sign, _ := basic.Sign(privateKey1, message)
+	// 		println("sign:",sign.String())
+	// 		println("publicKey:",privateKey1.GetG1Element().String())
+	// 		println("sign:",sign.String())
+	// 	}
+	if !basic.Verify(privateKey1.GetG1Element(), message, sign) {
 		println("verify fail")
 		t.FailNow()
 	}
-	augKey123 := PrivateKeyAggregate([]*PrivateKey{augKey12,privateKey3})
-	println("augKey123:",augKey123.String())
+	augKey123 := PrivateKeyAggregate([]*PrivateKey{augKey12, privateKey3})
+	println("augKey123:", augKey123.String())
 	augKey3 := PrivateKeyAggregate([]*PrivateKey{privateKey1, privateKey2, privateKey3})
 	println("augKey:", augKey3.String())
 	if augKey123.String() != augKey3.String() {
-	   t.FailNow()
+		t.FailNow()
 	}
 }
