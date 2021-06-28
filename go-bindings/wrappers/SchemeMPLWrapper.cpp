@@ -138,6 +138,21 @@ BytesWrapper AugSchemeMPLWrapperSign(
     return BytesWrapperInit(sigBytes.data(),sigBytes.size());
 }
 
+BytesWrapper AugSchemeMPLWrapperPrependingSign(
+    AugSchemeMPLWrapper augScheme,
+    PrivateKeyWrapper privateKeyWrapper,
+    const uint8_t * message,size_t size,
+    BytesWrapper publicKeyWrapper){
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
+    bls::PrivateKey *privateKey = (bls::PrivateKey*) privateKeyWrapper;
+    bls::Bytes *g1Bytes = (bls::Bytes*) publicKeyWrapper;
+    vector<uint8_t> msg(message,message+size);
+    bls::G1Element g1 = bls::G1Element::FromBytes(*g1Bytes);
+    bls::G2Element sig = (*augSchemeMpl).Sign(*privateKey,msg,g1);
+    std::vector<uint8_t> sigBytes = sig.Serialize();
+    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
+}
+
 int AugSchemeMPLWrapperVerify(
     AugSchemeMPLWrapper augScheme,
     BytesWrapper publicKeyBytes,
@@ -167,6 +182,36 @@ PrivateKeyWrapper AugSchemeMPLDeriveChildSk(AugSchemeMPLWrapper augScheme,Privat
     bls::PrivateKey childSk = (*augSchemeMpl).DeriveChildSk(*masterPrivateKey,index);
     bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
     return (void *)(childPrivateKey);
+}
+
+BytesWrapper AugSchemeMPLWrapperAggregateG1Element(
+    AugSchemeMPLWrapper augScheme,
+    const BytesWrapper * publicKeys,int num){
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
+    std::vector<bls::G1Element> pubKeys;
+    for (int i = 0 ;i < num ;i++){
+        bls::Bytes *bytes =  (bls::Bytes*)(publicKeys[i]);
+        bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
+        pubKeys.push_back(g1);
+    }
+    bls::G1Element g1 = (*augSchemeMpl).Aggregate(pubKeys);
+    vector<uint8_t> sigBytes = g1.Serialize();
+    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
+}
+
+BytesWrapper AugSchemeMPLWrapperAggregateG2Element(
+    AugSchemeMPLWrapper augScheme,
+    const BytesWrapper * signatures,int num){
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
+    std::vector<bls::G2Element> signs;
+    for (int i = 0 ;i < num ;i++){
+        bls::Bytes *bytes =  (bls::Bytes*)(signatures[i]);
+        bls::G2Element g2 = bls::G2Element::FromBytes(*bytes);
+        signs.push_back(g2);
+    }
+    bls::G2Element g2 = (*augSchemeMpl).Aggregate(signs);
+    vector<uint8_t> sigBytes = g2.Serialize();
+    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
 }
 
 int AugSchemeMPLWrapperAggregateVerify(

@@ -68,6 +68,20 @@ BytesWrapper AugSchemeMPLWrapperSign(
     PrivateKeyWrapper privateKeyWrapper,
     const uint8_t * message,size_t size);
 
+BytesWrapper AugSchemeMPLWrapperPrependingSign(
+    AugSchemeMPLWrapper augScheme,
+    PrivateKeyWrapper privateKeyWrapper,
+    const uint8_t * message,size_t size,
+    BytesWrapper publicKeyWrapper);
+
+BytesWrapper AugSchemeMPLWrapperAggregateG1Element(
+    AugSchemeMPLWrapper augScheme,
+    const BytesWrapper * publicKeys,int num);
+
+BytesWrapper AugSchemeMPLWrapperAggregateG2Element(
+    AugSchemeMPLWrapper augScheme,
+    const BytesWrapper * signatures,int num);
+
 int AugSchemeMPLWrapperVerify(
     AugSchemeMPLWrapper augScheme,
     BytesWrapper publicKeyBytes,
