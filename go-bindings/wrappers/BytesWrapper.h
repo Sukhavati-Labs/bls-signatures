@@ -26,6 +26,7 @@ BytesWrapper BytesWrapperInit(const uint8_t *buffer, size_t bufferSize);
 void BytesWrapperFree(BytesWrapper bytesWrapper);
 size_t BytesWrapperSize(BytesWrapper bytesWrapper);
 const uint8_t * BytesWrapperBegin(BytesWrapper bytesWrapper);
+const uint8_t * BytesWrapperEnd(BytesWrapper bytesWrapper);
 uint8_t BytesWrapperIndex(BytesWrapper bytesWrapper,int index);
 #ifdef __cplusplus
 }

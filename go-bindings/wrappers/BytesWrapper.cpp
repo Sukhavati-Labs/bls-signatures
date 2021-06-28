@@ -17,27 +17,37 @@
 #include "BytesWrapper.h"
 
 BytesWrapper BytesWrapperInit(const uint8_t * buffer ,size_t bufferSize){
-    bls::Bytes * bytesWrapper =  new bls::Bytes(buffer,bufferSize);
+    // safe use buffer copy
+    uint8_t *bufferDup = (uint8_t*)malloc(bufferSize);
+    memcpy(bufferDup,buffer,bufferSize);
+    bls::Bytes * bytesWrapper =  new bls::Bytes(bufferDup,bufferSize);
     return reinterpret_cast<void *>(bytesWrapper);
 }
 
 void BytesWrapperFree(BytesWrapper bytesWrapper){
-    bls::Bytes *b = (bls::Bytes *) bytesWrapper;
+    bls::Bytes *b = reinterpret_cast<bls::Bytes *>(bytesWrapper);
+    uint8_t * buffer = const_cast<uint8_t*>(b->begin());
+    free(buffer);
     delete b;
 }
 
 size_t BytesWrapperSize(BytesWrapper bytesWrapper){
-    bls::Bytes *b = (bls::Bytes *) bytesWrapper;
+    bls::Bytes *b = reinterpret_cast<bls::Bytes *>(bytesWrapper);
     return b->size();
 }
 
 const uint8_t * BytesWrapperBegin(BytesWrapper bytesWrapper){
-    bls::Bytes *b = (bls::Bytes *) bytesWrapper;
+    bls::Bytes *b = reinterpret_cast<bls::Bytes *>(bytesWrapper);
     return b->begin();
 }
 
+const uint8_t * BytesWrapperEnd(BytesWrapper bytesWrapper){
+    bls::Bytes *b = reinterpret_cast<bls::Bytes*>(bytesWrapper);
+    return b->end();
+}
+
 uint8_t BytesWrapperIndex(BytesWrapper bytesWrapper,int index){
-    bls::Bytes *b = (bls::Bytes *) bytesWrapper;
+    bls::Bytes *b = reinterpret_cast<bls::Bytes *>(bytesWrapper);
     uint8_t c = (*b)[index];
     return c;
 }
