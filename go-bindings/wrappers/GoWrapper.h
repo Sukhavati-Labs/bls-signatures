@@ -13,14 +13,14 @@
 // limitations under the License.
 
 
-#ifndef BLS_GO_BINDINGS_ELEMENT_WRAPPER_H
-#define BLS_GO_BINDINGS_ELEMENT_WRAPPER_H
-#include "BytesWrapper.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef BLS_GO_BINDINGS_GO_WRAPPER_H
+#define BLS_GO_BINDINGS_GO_WRAPPER_H
 
-#ifdef __cplusplus
-}
-#endif
-#endif  // BLS_GO_BINDINGS_ELEMENT_WRAPPER_H
+//typedef struct RetWrapper {
+//    void * handle;       // return void * pointer handle
+//    const char * ptrErr; // error message info
+//};
+
+
+
+#endif  // BLS_GO_BINDINGS_GO_WRAPPER_H

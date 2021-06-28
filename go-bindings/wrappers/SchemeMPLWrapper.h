@@ -26,17 +26,49 @@ typedef void * BasicSchemeMPLWrapper;
 
 BasicSchemeMPLWrapper BasicSchemeMPLWrapperInit();
 
-PrivateKeyWrapper BasicSchemeMPLWrapperGenKey(BasicSchemeMPLWrapper basicScheme,const uint8_t * seed,size_t size);
+PrivateKeyWrapper BasicSchemeMPLWrapperKeyGen(BasicSchemeMPLWrapper basicScheme,const uint8_t * seed,size_t size);
 
-BytesWrapper BasicSchemeMPLWrapperAggregateG1Element(BasicSchemeMPLWrapper basicScheme,const BytesWrapper * pubKeys,int num);
+BytesWrapper BasicSchemeMPLWrapperSkToPk();
 
-BytesWrapper BasicSchemeMPLWrapperSign(BasicSchemeMPLWrapper basicScheme,PrivateKeyWrapper privateKeyWrapper,const uint8_t * message,size_t size);
+BytesWrapper BasicSchemeMPLWrapperAggregateG1Element(
+    BasicSchemeMPLWrapper basicScheme,
+    const BytesWrapper * publicKeys,int num);
 
-int BasicSchemeMPLWrapperVerify(BasicSchemeMPLWrapper basicScheme,BytesWrapper publicKeyBytes,const uint8_t * message,size_t size,BytesWrapper signatureBytes);
+BytesWrapper BasicSchemeMPLWrapperAggregateG2Element(
+    BasicSchemeMPLWrapper basicScheme,
+    const BytesWrapper * signatures,int num);
+
+int BasicSchemeMPLWrapperAggregateVerify(
+    BasicSchemeMPLWrapper basicScheme,
+    const BytesWrapper * publicKeys,int keyNum,
+    const BytesWrapper * messages,int msgNum,
+    const BytesWrapper signature);
+
+BytesWrapper BasicSchemeMPLWrapperSign(
+    BasicSchemeMPLWrapper basicScheme,
+    PrivateKeyWrapper privateKeyWrapper,
+    const uint8_t * message,size_t size);
+
+int BasicSchemeMPLWrapperVerify(
+    BasicSchemeMPLWrapper basicScheme,
+    BytesWrapper publicKeyBytes,
+    const uint8_t * message,size_t size,
+    BytesWrapper signatureBytes);
 
 typedef void * AugSchemeMPLWrapper;
 
 AugSchemeMPLWrapper AugSchemeMPLWrapperInit();
+
+PrivateKeyWrapper AugSchemeMPLWrapperKeyGen(
+    AugSchemeMPLWrapper augScheme,
+    const uint8_t * seed,size_t size);
+
+typedef void * PopSchemeMPLWrapper;
+
+PopSchemeMPLWrapper PopSchemeMPLWrapperInit();
+
+PrivateKeyWrapper PopSchemeMPLWrapperKeyGen(PopSchemeMPLWrapper popScheme,const uint8_t * seed,size_t size);
+
 #ifdef __cplusplus
 }
 #endif
