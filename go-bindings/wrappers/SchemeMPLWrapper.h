@@ -63,6 +63,25 @@ PrivateKeyWrapper AugSchemeMPLWrapperKeyGen(
     AugSchemeMPLWrapper augScheme,
     const uint8_t * seed,size_t size);
 
+BytesWrapper AugSchemeMPLWrapperSign(
+    AugSchemeMPLWrapper augScheme,
+    PrivateKeyWrapper privateKeyWrapper,
+    const uint8_t * message,size_t size);
+
+int AugSchemeMPLWrapperVerify(
+    AugSchemeMPLWrapper augScheme,
+    BytesWrapper publicKeyBytes,
+    const uint8_t * message,size_t size,
+    BytesWrapper signatureBytes);
+
+int AugSchemeMPLWrapperAggregateVerify(
+    AugSchemeMPLWrapper augScheme,
+    const BytesWrapper * publicKeys,int keyNum,
+    const BytesWrapper * messages,int msgNum,
+    const BytesWrapper signature);
+
+PrivateKeyWrapper AugSchemeMPLDeriveChildSk(AugSchemeMPLWrapper augScheme,PrivateKeyWrapper master,uint32_t index);
+
 typedef void * PopSchemeMPLWrapper;
 
 PopSchemeMPLWrapper PopSchemeMPLWrapperInit();

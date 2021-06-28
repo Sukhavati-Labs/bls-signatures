@@ -24,10 +24,10 @@ func TestBytesBuffer_Bytes(t *testing.T) {
 	messageBytes := []byte(message)
 	buffer := newBytesBufferFromBytes(messageBytes)
 	if !bytes.Equal(buffer.Bytes(), messageBytes) {
-		t.Errorf("bls bytes:%s != message:%s",buffer.String(),hex.EncodeToString(messageBytes))
+		t.Errorf("bls bytes:%s != message:%s", buffer.String(), hex.EncodeToString(messageBytes))
 		t.FailNow()
 	}
-	t.Logf("TestBLSBytes bls bytes:%s == message:%s",buffer.String(), hex.EncodeToString(messageBytes))
+	t.Logf("TestBLSBytes bls bytes:%s == message:%s", buffer.String(), hex.EncodeToString(messageBytes))
 }
 
 func TestBytesBuffer_Index(t *testing.T) {
@@ -70,7 +70,7 @@ func TestBasicSchemeMPL_KeyGen(t *testing.T) {
 	if privateKey == nil {
 		t.FailNow()
 	}
-	publicKey ,err:= privateKey.GetG1Element()
+	publicKey, err := privateKey.GetG1Element()
 	if err != nil {
 		t.FailNow()
 	}
@@ -84,11 +84,11 @@ func TestBasicSchemeMPL_PrivateKey(t *testing.T) {
 	if err != nil {
 		t.FailNow()
 	}
-	privateKey,err := NewPrivateKeyFromBytes(privateKeyBytes)
+	privateKey, err := NewPrivateKeyFromBytes(privateKeyBytes)
 	if err != nil {
 		t.FailNow()
 	}
-	pubKey ,err:= privateKey.GetG1Element()
+	pubKey, err := privateKey.GetG1Element()
 	if err != nil {
 		t.FailNow()
 	}
@@ -96,7 +96,7 @@ func TestBasicSchemeMPL_PrivateKey(t *testing.T) {
 	if pubKey.String() != publicKeyStr {
 		t.FailNow()
 	}
-	privateKey2,err := NewPrivateKeyFromBytes(privateKey.Bytes())
+	privateKey2, err := NewPrivateKeyFromBytes(privateKey.Bytes())
 	if err != nil {
 		t.FailNow()
 	}
@@ -134,12 +134,12 @@ func TestPrivateKeyAggregate(t *testing.T) {
 	}
 	privateKey1, err := basic.KeyGen(seed1)
 	if err != nil {
-		t.Error("privateKey1 seed fail",err)
+		t.Error("privateKey1 seed fail", err)
 		t.FailNow()
 	}
-	privateKey1FromBytes,err := NewPrivateKeyFromBytes(privateKey1.Bytes())
+	privateKey1FromBytes, err := NewPrivateKeyFromBytes(privateKey1.Bytes())
 	if err != nil {
-		t.Error("privateKey1 seed fail",err)
+		t.Error("privateKey1 seed fail", err)
 		t.FailNow()
 	}
 	if privateKey1FromBytes.String() != privateKey1.String() {
@@ -149,44 +149,44 @@ func TestPrivateKeyAggregate(t *testing.T) {
 
 	privateKey2, err := basic.KeyGen(seed2)
 	if err != nil {
-		t.Error("privateKey2 fail",err)
+		t.Error("privateKey2 fail", err)
 		t.FailNow()
 	}
 	t.Log("privateKey2:", privateKey2.String())
 	privateKey3, err := basic.KeyGen(seed3)
 	if err != nil {
-		t.Error("privateKey3 fail",err)
+		t.Error("privateKey3 fail", err)
 		t.FailNow()
 	}
 	message := []byte{1, 2, 3}
 	t.Log("privateKey3:", privateKey3.String())
 	augKey12 := PrivateKeyAggregate([]*PrivateKey{privateKey1, privateKey2})
 	t.Log("augKey12:", augKey12.String())
-	pubKey12,err := augKey12.GetG1Element()
+	pubKey12, err := augKey12.GetG1Element()
 	if err != nil {
-		t.Error("privateKey12 fail",err)
+		t.Error("privateKey12 fail", err)
 		t.FailNow()
 	}
 	t.Log("pubKey12:", pubKey12.String())
 	sign, err := basic.Sign(privateKey1, message)
 	if err != nil {
-		t.Error("sign fail",err)
+		t.Error("sign fail", err)
 		t.FailNow()
 	}
 	t.Log("sign:", sign.String())
-	publicKey1,err := privateKey1.GetG1Element()
+	publicKey1, err := privateKey1.GetG1Element()
 	if err != nil {
-		t.Error("sign fail",err)
+		t.Error("sign fail", err)
 		t.FailNow()
 	}
 	t.Log("publicKey:", publicKey1)
-	ok,err:=basic.Verify(publicKey1, message, sign)
+	ok, err := basic.Verify(publicKey1, message, sign)
 	if err != nil {
-		t.Error("sign fail",err)
+		t.Error("sign fail", err)
 		t.FailNow()
 	}
 	if !ok {
-		t.Error("sign fail",err)
+		t.Error("sign fail", err)
 		t.FailNow()
 	}
 	augKey123 := PrivateKeyAggregate([]*PrivateKey{augKey12, privateKey3})
@@ -196,4 +196,53 @@ func TestPrivateKeyAggregate(t *testing.T) {
 	if augKey123.String() != augKey3.String() {
 		t.FailNow()
 	}
+}
+
+func TestAugSchemeMPL_AggregatePublicKeys(t *testing.T) {
+
+}
+
+func TestAugSchemeMPL_DeriveChildSk(t *testing.T) {
+	privateKeyBytes, err := hex.DecodeString("007259d0b6faf4478c2461e372aae59cea4ed4d4fc3e3668fc061df6cd000729")
+
+	if err != nil {
+		t.FailNow()
+	}
+	publicKeyBytes, err := hex.DecodeString("b785108ae0cb2d4c34376d3ed93174a237d0d582a308f4778d5bbe95351703372dfaac2f155aefedac603f0ca88e11af")
+	if err != nil {
+		t.FailNow()
+	}
+	privateKey, err := NewPrivateKeyFromBytes(privateKeyBytes)
+	t.Log("sk0:", privateKey.String())
+	mpl := NewAugSchemeMPL()
+	sk1, err := mpl.DeriveChildSk(privateKey, 12381)
+	if err != nil {
+		t.FailNow()
+	}
+	t.Log("sk1:", sk1.String())
+	sk2, err := mpl.DeriveChildSk(sk1, 8444)
+	if err != nil {
+		t.FailNow()
+	}
+	t.Log("sk2:", sk2.String())
+	sk3, err := mpl.DeriveChildSk(sk2, 0)
+	if err != nil {
+		t.FailNow()
+	}
+	t.Log("sk3:", sk3.String())
+	sk4, err := mpl.DeriveChildSk(sk3, 0)
+	if err != nil {
+		t.FailNow()
+	}
+	// 52d4341dfbe7eac0d10ebdc76d91d5f6536c9dbb1ce1423d5785f79874226099
+	t.Log("sk4:", sk4.String())
+	pk4, err := sk4.GetG1Element()
+	if err != nil {
+		t.FailNow()
+	}
+	t.Log("pk4:", pk4.String())
+	if !bytes.Equal(pk4.Bytes(), publicKeyBytes) {
+		t.FailNow()
+	}
+
 }
