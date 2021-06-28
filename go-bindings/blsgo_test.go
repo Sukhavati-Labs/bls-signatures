@@ -160,7 +160,10 @@ func TestPrivateKeyAggregate(t *testing.T) {
 	}
 	message := []byte{1, 2, 3}
 	t.Log("privateKey3:", privateKey3.String())
-	augKey12 := PrivateKeyAggregate([]*PrivateKey{privateKey1, privateKey2})
+	augKey12,err := PrivateKeyAggregate([]*PrivateKey{privateKey1, privateKey2})
+	if err != nil {
+		t.FailNow()
+	}
 	t.Log("augKey12:", augKey12.String())
 	pubKey12, err := augKey12.GetG1Element()
 	if err != nil {
@@ -189,9 +192,15 @@ func TestPrivateKeyAggregate(t *testing.T) {
 		t.Error("sign fail", err)
 		t.FailNow()
 	}
-	augKey123 := PrivateKeyAggregate([]*PrivateKey{augKey12, privateKey3})
+	augKey123 ,err:= PrivateKeyAggregate([]*PrivateKey{augKey12, privateKey3})
+	if err != nil {
+		t.FailNow()
+	}
 	t.Log("augKey123:", augKey123.String())
-	augKey3 := PrivateKeyAggregate([]*PrivateKey{privateKey1, privateKey2, privateKey3})
+	augKey3 ,err:= PrivateKeyAggregate([]*PrivateKey{privateKey1, privateKey2, privateKey3})
+	if err != nil {
+		t.FailNow()
+	}
 	t.Log("augKey:", augKey3.String())
 	if augKey123.String() != augKey3.String() {
 		t.FailNow()
@@ -244,5 +253,47 @@ func TestAugSchemeMPL_DeriveChildSk(t *testing.T) {
 	if !bytes.Equal(pk4.Bytes(), publicKeyBytes) {
 		t.FailNow()
 	}
-
 }
+
+func DerivePath(sk *PrivateKey, path []int) (privateKey *PrivateKey, err error) {
+	privateKey = sk
+	mpl := NewAugSchemeMPL()
+	for _, index := range path {
+		privateKey, err = mpl.DeriveChildSk(privateKey, uint32(index))
+		if err != nil {
+			return nil, err
+		}
+	}
+	return privateKey, nil
+}
+
+func TestDerivePath(t *testing.T){
+	farmerKeyBytes, err := hex.DecodeString("b785108ae0cb2d4c34376d3ed93174a237d0d582a308f4778d5bbe95351703372dfaac2f155aefedac603f0ca88e11af")
+	if err != nil {
+		t.FailNow()
+	}
+	privateKeyBytes, err := hex.DecodeString("007259d0b6faf4478c2461e372aae59cea4ed4d4fc3e3668fc061df6cd000729")
+
+	if err != nil {
+		t.FailNow()
+	}
+	privateKey, err := NewPrivateKeyFromBytes(privateKeyBytes)
+	if err != nil {
+		t.FailNow()
+	}
+
+	farmerPrivateKey, err := DerivePath(privateKey, []int{12381, 8444, 0, 0})
+	if err != nil {
+		t.FailNow()
+	}
+	farmerPublicKey, err := farmerPrivateKey.GetG1Element()
+	if err != nil {
+		t.FailNow()
+	}
+	if !bytes.Equal(farmerKeyBytes, farmerPublicKey.Bytes()) {
+		t.FailNow()
+	}
+}
+
+
+

@@ -146,7 +146,7 @@ func (sk *PrivateKey) GetG1Element() (*G1Element, error) {
 	return g1, nil
 }
 
-func PrivateKeyAggregate(privateKeys []*PrivateKey) *PrivateKey {
+func PrivateKeyAggregate(privateKeys []*PrivateKey) (*PrivateKey,error) {
 	num := len(privateKeys)
 	privKeys := make([]C.PrivateKeyWrapper, num)
 	for i, k := range privateKeys {
@@ -156,7 +156,7 @@ func PrivateKeyAggregate(privateKeys []*PrivateKey) *PrivateKey {
 	privateKey := &PrivateKey{
 		instance: augKey,
 	}
-	return privateKey
+	return privateKey,nil
 }
 
 //G1Element g1 element
@@ -454,6 +454,14 @@ func (a AugSchemeMPL) Sign(privateKey *PrivateKey, message []byte) (signature *G
 	return newG2ElementFromBytesBuffer(data)
 }
 
+func (a AugSchemeMPL) PrependingSign(privateKey *PrivateKey, message []byte,publicKey *G1Element)(signature *G2Element, err error){
+	cBuffer, size := bytesToCUint8Bytes(message)
+	defer C.free(unsafe.Pointer(cBuffer))
+	sig := C.AugSchemeMPLWrapperPrependingSign(a.instance, privateKey.instance, cBuffer, size,publicKey.instance.instance)
+	data := newBytesBufferFromBytesWrapper(sig)
+	return newG2ElementFromBytesBuffer(data)
+}
+
 func (a AugSchemeMPL) Verify(publicKey *G1Element, message []byte, signature *G2Element) (bool, error) {
 	cBuffer, size := bytesToCUint8Bytes(message)
 	defer C.free(unsafe.Pointer(cBuffer))
@@ -462,11 +470,25 @@ func (a AugSchemeMPL) Verify(publicKey *G1Element, message []byte, signature *G2
 }
 
 func (a AugSchemeMPL) AggregateSignatures(signatures []*G2Element) (*G2Element, error) {
-	panic("implement me")
+	num := len(signatures)
+	signs := make([]C.BytesWrapper, num)
+	for i, k := range signatures {
+		signs[i] = k.instance.instance
+	}
+	augKey := C.AugSchemeMPLWrapperAggregateG2Element(a.instance, (*C.BytesWrapper)(unsafe.Pointer(&signs[0])), C.int(num))
+	data := newBytesBufferFromBytesWrapper(augKey)
+	return newG2ElementFromBytesBuffer(data)
 }
 
 func (a AugSchemeMPL) AggregatePublicKeys(publicKeys []*G1Element) (*G1Element, error) {
-	panic("implement me")
+	num := len(publicKeys)
+	pubKeys := make([]C.BytesWrapper, num)
+	for i, k := range publicKeys {
+		pubKeys[i] = k.instance.instance
+	}
+	augKey := C.AugSchemeMPLWrapperAggregateG1Element(a.instance, (*C.BytesWrapper)(unsafe.Pointer(&pubKeys[0])), C.int(num))
+	data := newBytesBufferFromBytesWrapper(augKey)
+	return newG1ElementFromBytesBuffer(data)
 }
 
 func (a AugSchemeMPL) AggregateVerify(publicKeys []*G1Element, messages [][]byte, signature *G2Element) (bool, error) {

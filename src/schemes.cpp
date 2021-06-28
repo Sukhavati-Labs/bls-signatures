@@ -334,7 +334,7 @@ G2Element AugSchemeMPL::Sign(const PrivateKey &seckey,
 }
 
 // Used for prepending different augMessage
-G2Element AugSchemeMPL::Sign(const PrivateKey& seckey,
+G2Element AugSchemeMPL:: Sign(const PrivateKey& seckey,
                              const Bytes& message,
                              const G1Element& prepend_pk)
 {
