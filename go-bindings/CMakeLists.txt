@@ -16,7 +16,7 @@ add_library(blsgo STATIC
         wrappers/ElementWrapper.cpp
         wrappers/ElementWrapper.h
         wrappers/GoWrapper.cpp
-        wrappers/GoWrapper.h)
+        wrappers/GoWrapper.h wrappers/HKDFWrapper.cpp wrappers/HKDFWrapper.h)
 
 include_directories(
         ${INCLUDE_DIRECTORIES}
