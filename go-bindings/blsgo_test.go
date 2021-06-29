@@ -211,6 +211,28 @@ func TestAugSchemeMPL_AggregatePublicKeys(t *testing.T) {
 
 }
 
+func TestG1Element_GetFingerprint(t *testing.T){
+    publicKeyBytes,err := hex.DecodeString("a60a1b6a2eece9575eda4e5eba4408b0eae4213f55e0a6560a9d826a8340a6f4c2d0c956803d756269d5fc25c898f9db")
+    if err != nil {
+        t.FailNow()
+    }
+	publicKey, err := NewG1ElementFromBytes(publicKeyBytes)
+	if err != nil {
+		t.FailNow()
+	}
+	fingerprint,err := publicKey.GetFingerprint()
+	if err != nil {
+		t.FailNow()
+	}
+	var fingerprintWant uint32  =1010781798
+	t.Log("fingerprint:",fingerprint)
+	t.Log("want fingerprint:",fingerprintWant)
+	if fingerprint != fingerprintWant {
+		t.FailNow()
+	}
+
+}
+
 func TestAugSchemeMPL_DeriveChildSk(t *testing.T) {
 	privateKeyBytes, err := hex.DecodeString("007259d0b6faf4478c2461e372aae59cea4ed4d4fc3e3668fc061df6cd000729")
 
@@ -295,5 +317,35 @@ func TestDerivePath(t *testing.T){
 	}
 }
 
+func TestBasicSchemeMPL_Sign(t *testing.T){
+	mpl := NewAugSchemeMPL()
+	seed := []byte{
+		1,2,3,4,5,6,7,8,
+		1,2,3,4,5,6,7,8,
+		1,2,3,4,5,6,7,8,
+		1,2,3,4,5,6,7,8,
+	}
+	privateKey, err := mpl.KeyGen(seed)
+	if err != nil {
+		t.FailNow()
+	}
+	sign, err := mpl.Sign(privateKey, seed)
+	if err != nil {
+		t.FailNow()
+	}
+	t.Log("sign:",sign.String())
+	publicKey, err := privateKey.GetG1Element()
+	if err != nil {
+		t.FailNow()
+	}
+	prependingSign, err := mpl.PrependingSign(privateKey, seed, publicKey)
+	if err != nil {
+		t.FailNow()
+	}
+	t.Log("prependingSign:",sign.String())
+	if !sign.IsEqual(prependingSign){
+		t.FailNow()
+	}
+}
 
 
