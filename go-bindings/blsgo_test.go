@@ -160,7 +160,7 @@ func TestPrivateKeyAggregate(t *testing.T) {
 	}
 	message := []byte{1, 2, 3}
 	t.Log("privateKey3:", privateKey3.String())
-	augKey12,err := PrivateKeyAggregate([]*PrivateKey{privateKey1, privateKey2})
+	augKey12, err := PrivateKeyAggregate([]*PrivateKey{privateKey1, privateKey2})
 	if err != nil {
 		t.FailNow()
 	}
@@ -192,12 +192,12 @@ func TestPrivateKeyAggregate(t *testing.T) {
 		t.Error("sign fail", err)
 		t.FailNow()
 	}
-	augKey123 ,err:= PrivateKeyAggregate([]*PrivateKey{augKey12, privateKey3})
+	augKey123, err := PrivateKeyAggregate([]*PrivateKey{augKey12, privateKey3})
 	if err != nil {
 		t.FailNow()
 	}
 	t.Log("augKey123:", augKey123.String())
-	augKey3 ,err:= PrivateKeyAggregate([]*PrivateKey{privateKey1, privateKey2, privateKey3})
+	augKey3, err := PrivateKeyAggregate([]*PrivateKey{privateKey1, privateKey2, privateKey3})
 	if err != nil {
 		t.FailNow()
 	}
@@ -211,26 +211,71 @@ func TestAugSchemeMPL_AggregatePublicKeys(t *testing.T) {
 
 }
 
-func TestG1Element_GetFingerprint(t *testing.T){
-    publicKeyBytes,err := hex.DecodeString("a60a1b6a2eece9575eda4e5eba4408b0eae4213f55e0a6560a9d826a8340a6f4c2d0c956803d756269d5fc25c898f9db")
-    if err != nil {
-        t.FailNow()
-    }
+func TestG1Element_GetFingerprint(t *testing.T) {
+	publicKeyBytes, err := hex.DecodeString("a60a1b6a2eece9575eda4e5eba4408b0eae4213f55e0a6560a9d826a8340a6f4c2d0c956803d756269d5fc25c898f9db")
+	if err != nil {
+		t.FailNow()
+	}
 	publicKey, err := NewG1ElementFromBytes(publicKeyBytes)
 	if err != nil {
 		t.FailNow()
 	}
-	fingerprint,err := publicKey.GetFingerprint()
+	fingerprint, err := publicKey.GetFingerprint()
 	if err != nil {
 		t.FailNow()
 	}
-	var fingerprintWant uint32  =1010781798
-	t.Log("fingerprint:",fingerprint)
-	t.Log("want fingerprint:",fingerprintWant)
+	var fingerprintWant uint32 = 1010781798
+	t.Log("fingerprint:", fingerprint)
+	t.Log("want fingerprint:", fingerprintWant)
 	if fingerprint != fingerprintWant {
 		t.FailNow()
 	}
 
+}
+
+func TestG1Element_Add(t *testing.T) {
+	seed1 := []byte{
+		1, 2, 3, 4, 5, 6, 7, 8,
+		8, 7, 6, 5, 4, 3, 2, 1,
+		1, 1, 1, 1, 1, 1, 1, 1,
+		2, 2, 2, 2, 2, 2, 2, 2,
+	}
+	seed2 := []byte{
+		1, 2, 3, 4, 5, 6, 7, 8,
+		8, 7, 6, 5, 4, 3, 2, 1,
+		1, 1, 1, 1, 1, 1, 1, 1,
+		3, 2, 2, 2, 2, 2, 2, 2,
+	}
+	mpl := NewAugSchemeMPL()
+	privateKey1, err := mpl.KeyGen(seed1)
+	if err != nil {
+		t.FailNow()
+	}
+	publicKey1, err := privateKey1.GetG1Element()
+	if err != nil {
+		t.FailNow()
+	}
+	privateKey2, err := mpl.KeyGen(seed2)
+	if err != nil {
+		t.FailNow()
+	}
+	publicKey2, err := privateKey2.GetG1Element()
+	if err != nil {
+		t.FailNow()
+	}
+	add1, err := publicKey1.Add(publicKey2)
+	if err != nil {
+		t.FailNow()
+	}
+	t.Log("publicKey1 + publicKey2:", add1.String())
+	add2, err := publicKey2.Add(publicKey1)
+	if err != nil {
+		t.FailNow()
+	}
+	t.Log("publicKey2 + publicKey1:", add2.String())
+	if !add1.IsEqual(add2) {
+		t.FailNow()
+	}
 }
 
 func TestAugSchemeMPL_DeriveChildSk(t *testing.T) {
@@ -289,7 +334,7 @@ func DerivePath(sk *PrivateKey, path []int) (privateKey *PrivateKey, err error) 
 	return privateKey, nil
 }
 
-func TestDerivePath(t *testing.T){
+func TestDerivePath(t *testing.T) {
 	farmerKeyBytes, err := hex.DecodeString("b785108ae0cb2d4c34376d3ed93174a237d0d582a308f4778d5bbe95351703372dfaac2f155aefedac603f0ca88e11af")
 	if err != nil {
 		t.FailNow()
@@ -317,13 +362,13 @@ func TestDerivePath(t *testing.T){
 	}
 }
 
-func TestBasicSchemeMPL_Sign(t *testing.T){
+func TestBasicSchemeMPL_Sign(t *testing.T) {
 	mpl := NewAugSchemeMPL()
 	seed := []byte{
-		1,2,3,4,5,6,7,8,
-		1,2,3,4,5,6,7,8,
-		1,2,3,4,5,6,7,8,
-		1,2,3,4,5,6,7,8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
 	}
 	privateKey, err := mpl.KeyGen(seed)
 	if err != nil {
@@ -333,7 +378,7 @@ func TestBasicSchemeMPL_Sign(t *testing.T){
 	if err != nil {
 		t.FailNow()
 	}
-	t.Log("sign:",sign.String())
+	t.Log("sign:", sign.String())
 	publicKey, err := privateKey.GetG1Element()
 	if err != nil {
 		t.FailNow()
@@ -342,10 +387,8 @@ func TestBasicSchemeMPL_Sign(t *testing.T){
 	if err != nil {
 		t.FailNow()
 	}
-	t.Log("prependingSign:",sign.String())
-	if !sign.IsEqual(prependingSign){
+	t.Log("prependingSign:", sign.String())
+	if !sign.IsEqual(prependingSign) {
 		t.FailNow()
 	}
 }
-
-

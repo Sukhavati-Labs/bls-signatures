@@ -146,7 +146,7 @@ func (sk *PrivateKey) GetG1Element() (*G1Element, error) {
 	return g1, nil
 }
 
-func PrivateKeyAggregate(privateKeys []*PrivateKey) (*PrivateKey,error) {
+func PrivateKeyAggregate(privateKeys []*PrivateKey) (*PrivateKey, error) {
 	num := len(privateKeys)
 	privKeys := make([]C.PrivateKeyWrapper, num)
 	for i, k := range privateKeys {
@@ -156,7 +156,7 @@ func PrivateKeyAggregate(privateKeys []*PrivateKey) (*PrivateKey,error) {
 	privateKey := &PrivateKey{
 		instance: augKey,
 	}
-	return privateKey,nil
+	return privateKey, nil
 }
 
 //G1Element g1 element
@@ -197,17 +197,18 @@ func (g1 *G1Element) IsEqual(element *G1Element) bool {
 	return bytes.Equal(g1.Bytes(), element.Bytes())
 }
 
-func (g1 *G1Element) Add(element *G1Element) *G1Element {
-	return nil
+func (g1 *G1Element) Add(addend *G1Element) (*G1Element, error) {
+	wrapper := newBytesBufferFromBytesWrapper(C.G1ElementAdd(g1.instance.instance, addend.instance.instance))
+	return newG1ElementFromBytesBuffer(wrapper)
 }
 
 func (g1 *G1Element) Size() int {
 	return G1ElementSize
 }
 
-func (g1 G1Element) GetFingerprint() (uint32,error) {
+func (g1 G1Element) GetFingerprint() (uint32, error) {
 	fingerpint := C.G1ElementGetFingerprint(g1.instance.instance)
-	return uint32(fingerpint),nil
+	return uint32(fingerpint), nil
 }
 
 func (g1 *G1Element) String() string {
@@ -459,10 +460,10 @@ func (a AugSchemeMPL) Sign(privateKey *PrivateKey, message []byte) (signature *G
 	return newG2ElementFromBytesBuffer(data)
 }
 
-func (a AugSchemeMPL) PrependingSign(privateKey *PrivateKey, message []byte,publicKey *G1Element)(signature *G2Element, err error){
+func (a AugSchemeMPL) PrependingSign(privateKey *PrivateKey, message []byte, publicKey *G1Element) (signature *G2Element, err error) {
 	cBuffer, size := bytesToCUint8Bytes(message)
 	defer C.free(unsafe.Pointer(cBuffer))
-	sig := C.AugSchemeMPLWrapperPrependingSign(a.instance, privateKey.instance, cBuffer, size,publicKey.instance.instance)
+	sig := C.AugSchemeMPLWrapperPrependingSign(a.instance, privateKey.instance, cBuffer, size, publicKey.instance.instance)
 	data := newBytesBufferFromBytesWrapper(sig)
 	return newG2ElementFromBytesBuffer(data)
 }

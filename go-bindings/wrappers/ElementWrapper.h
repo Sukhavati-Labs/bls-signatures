@@ -22,6 +22,7 @@
 extern "C" {
 #endif
 uint32_t G1ElementGetFingerprint(BytesWrapper publicKeyWrapper);
+BytesWrapper G1ElementAdd(BytesWrapper publicKeyWrapper,BytesWrapper publicKeyAddendWrapper);
 #ifdef __cplusplus
 }
 #endif
