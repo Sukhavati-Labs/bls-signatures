@@ -23,3 +23,13 @@ uint32_t G1ElementGetFingerprint(BytesWrapper publicKeyWrapper){
     bls::G1Element g1 = bls::G1Element::FromBytes(*b);
     return  g1.GetFingerprint();
 }
+
+BytesWrapper G1ElementAdd(BytesWrapper publicKeyWrapper,BytesWrapper publicKeyAddendWrapper){
+    bls::Bytes *b = (bls::Bytes*)publicKeyWrapper;
+    bls::Bytes *bAddend = (bls::Bytes*) publicKeyAddendWrapper;
+    bls::G1Element g1 = bls::G1Element::FromBytes(*b);
+    bls::G1Element g1Addend = bls::G1Element::FromBytes(*bAddend);
+    bls::G1Element g1ret =  g1 + g1Addend;
+    std::vector<uint8_t> ret = g1ret.Serialize();
+    return BytesWrapperInit(ret.data(),ret.size());
+}
