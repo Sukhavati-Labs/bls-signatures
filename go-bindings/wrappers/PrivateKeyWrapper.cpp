@@ -38,6 +38,15 @@ int PrivateKeyWrapperIsZero(PrivateKeyWrapper privateKeyWrapper){
     return 0;
 }
 
+int PrivateKeyWrapperEquals(PrivateKeyWrapper privateKeyWrapper,PrivateKeyWrapper privateKeyOtherWrapper){
+    bls::PrivateKey *privateKey = (bls::PrivateKey*) privateKeyWrapper;
+    bls::PrivateKey *privateKeyOther = (bls::PrivateKey*) privateKeyOtherWrapper;
+    if ((*privateKey)==(*privateKeyOther)){
+        return 1;
+    }
+    return 0;
+}
+
 PrivateKeyWrapper PrivateKeyWrapperAggregate(const PrivateKeyWrapper *keys,int num){
     bls::PrivateKey **keyList =  (bls::PrivateKey**) keys;
     std::vector<bls::PrivateKey>keyVec;

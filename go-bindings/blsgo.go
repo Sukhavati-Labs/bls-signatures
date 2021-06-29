@@ -125,7 +125,17 @@ func (sk *PrivateKey) Bytes() []byte {
 }
 
 func (sk *PrivateKey) Equals(other *PrivateKey) bool {
-	return true
+	if other == nil {
+		return false
+	}
+	if bytes.Equal(sk.Bytes(), other.Bytes()) {
+		return true
+	}
+	ok := C.PrivateKeyWrapperEquals(sk.instance, other.instance)
+	if ok > 0 {
+		return true
+	}
+	return false
 }
 
 func (sk *PrivateKey) String() string {
@@ -133,7 +143,7 @@ func (sk *PrivateKey) String() string {
 }
 
 func (sk *PrivateKey) IsEqual(key *PrivateKey) bool {
-	return bytes.Equal(sk.Bytes(), key.Bytes())
+	return sk.Equals(key)
 }
 
 func (sk *PrivateKey) GetG1Element() (*G1Element, error) {
@@ -359,15 +369,23 @@ func (bs *BasicSchemeMPL) AggregateVerify(publicKeys []*G1Element, messages [][]
 }
 
 func (bs *BasicSchemeMPL) DeriveChildSk(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
-	panic("implement me")
+	sk := C.BasicSchemeMPLDeriveChildSk(bs.instance, privateKey.instance, C.uint32_t(index))
+	return &PrivateKey{
+		instance: sk,
+	}, nil
 }
 
 func (bs *BasicSchemeMPL) DeriveChildSkUnhardened(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
-	panic("implement me")
+	sk := C.BasicSchemeMPLDeriveChildSkUnhardened(bs.instance, privateKey.instance, C.uint32_t(index))
+	return &PrivateKey{
+		instance: sk,
+	}, nil
 }
 
 func (bs *BasicSchemeMPL) DeriveChildPkUnhardened(publicKey *G1Element, index uint32) (*G1Element, error) {
-	panic("implement me")
+	b := C.BasicSchemeMPLDeriveChildPkUnhardened(bs.instance, publicKey.instance.instance, C.uint32_t(index))
+	wrapper := newBytesBufferFromBytesWrapper(b)
+	return newG1ElementFromBytesBuffer(wrapper)
 }
 
 func (bs *BasicSchemeMPL) Aggregate(publicKeys []*G1Element) (*G1Element, error) {
@@ -380,6 +398,7 @@ func (bs *BasicSchemeMPL) Aggregate(publicKeys []*G1Element) (*G1Element, error)
 	data := newBytesBufferFromBytesWrapper(augKey)
 	return newG1ElementFromBytesBuffer(data)
 }
+
 func (bs *BasicSchemeMPL) Sign(privateKey *PrivateKey, message []byte) (*G2Element, error) {
 	cBuffer, size := bytesToCUint8Bytes(message)
 	defer C.free(unsafe.Pointer(cBuffer))
@@ -498,7 +517,29 @@ func (a AugSchemeMPL) AggregatePublicKeys(publicKeys []*G1Element) (*G1Element, 
 }
 
 func (a AugSchemeMPL) AggregateVerify(publicKeys []*G1Element, messages [][]byte, signature *G2Element) (bool, error) {
-	panic("implement me")
+	keyNum := len(publicKeys)
+	msgNum := len(messages)
+	if keyNum != msgNum {
+		return false, fmt.Errorf("Invalid parameter ")
+	}
+	messageBytes := make([]C.BytesWrapper, 0)
+	for _, message := range messages {
+		fromBytes := newBytesBufferFromBytes(message)
+		messageBytes = append(messageBytes, fromBytes.instance)
+	}
+	pubKeys := make([]C.BytesWrapper, 0)
+	for _, key := range publicKeys {
+		pubKeys = append(pubKeys, key.instance.instance)
+	}
+
+	ok := C.AugSchemeMPLWrapperAggregateVerify(a.instance,
+		(*C.BytesWrapper)(unsafe.Pointer(&pubKeys[0])), C.int(keyNum),
+		(*C.BytesWrapper)(unsafe.Pointer(&messageBytes[0])), C.int(msgNum),
+		signature.instance.instance)
+	if ok > 0 {
+		return true, nil
+	}
+	return false, nil
 }
 
 func (a AugSchemeMPL) DeriveChildSk(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
@@ -509,11 +550,16 @@ func (a AugSchemeMPL) DeriveChildSk(privateKey *PrivateKey, index uint32) (*Priv
 }
 
 func (a AugSchemeMPL) DeriveChildSkUnhardened(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
-	panic("implement me")
+	sk := C.AugSchemeMPLDeriveChildSkUnhardened(a.instance, privateKey.instance, C.uint32_t(index))
+	return &PrivateKey{
+		instance: sk,
+	}, nil
 }
 
 func (a AugSchemeMPL) DeriveChildPkUnhardened(publicKey *G1Element, index uint32) (*G1Element, error) {
-	panic("implement me")
+	b := C.AugSchemeMPLDeriveChildPkUnhardened(a.instance, publicKey.instance.instance, C.uint32_t(index))
+	wrapper := newBytesBufferFromBytesWrapper(b)
+	return newG1ElementFromBytesBuffer(wrapper)
 }
 
 var _ SchemeMPL = (*PopSchemeMPL)(nil)
@@ -563,35 +609,86 @@ func (p PopSchemeMPL) SkToG1(privateKey *PrivateKey) (*G1Element, error) {
 }
 
 func (p PopSchemeMPL) Sign(privateKey *PrivateKey, message []byte) (signature *G2Element, err error) {
-	panic("implement me")
+	cBuffer, size := bytesToCUint8Bytes(message)
+	defer C.free(unsafe.Pointer(cBuffer))
+	sig := C.PopSchemeMPLWrapperSign(p.instance, privateKey.instance, cBuffer, size)
+	data := newBytesBufferFromBytesWrapper(sig)
+	return newG2ElementFromBytesBuffer(data)
 }
 
 func (p PopSchemeMPL) Verify(publicKey *G1Element, message []byte, signature *G2Element) (bool, error) {
-	panic("implement me")
+	cBuffer, size := bytesToCUint8Bytes(message)
+	defer C.free(unsafe.Pointer(cBuffer))
+	ok := C.PopSchemeMPLWrapperVerify(p.instance, publicKey.instance.instance, cBuffer, size, signature.instance.instance)
+	return ok > 0, nil
 }
 
 func (p PopSchemeMPL) AggregateSignatures(signatures []*G2Element) (*G2Element, error) {
-	panic("implement me")
+	num := len(signatures)
+	signs := make([]C.BytesWrapper, num)
+	for i, k := range signatures {
+		signs[i] = k.instance.instance
+	}
+	augKey := C.PopSchemeMPLWrapperAggregateG2Element(p.instance, (*C.BytesWrapper)(unsafe.Pointer(&signs[0])), C.int(num))
+	data := newBytesBufferFromBytesWrapper(augKey)
+	return newG2ElementFromBytesBuffer(data)
 }
 
 func (p PopSchemeMPL) AggregatePublicKeys(publicKeys []*G1Element) (*G1Element, error) {
-	panic("implement me")
+	num := len(publicKeys)
+	pubKeys := make([]C.BytesWrapper, num)
+	for i, k := range publicKeys {
+		pubKeys[i] = k.instance.instance
+	}
+	augKey := C.PopSchemeMPLWrapperAggregateG1Element(p.instance, (*C.BytesWrapper)(unsafe.Pointer(&pubKeys[0])), C.int(num))
+	data := newBytesBufferFromBytesWrapper(augKey)
+	return newG1ElementFromBytesBuffer(data)
 }
 
 func (p PopSchemeMPL) AggregateVerify(publicKeys []*G1Element, messages [][]byte, signature *G2Element) (bool, error) {
-	panic("implement me")
+	keyNum := len(publicKeys)
+	msgNum := len(messages)
+	if keyNum != msgNum {
+		return false, fmt.Errorf("Invalid parameter ")
+	}
+	messageBytes := make([]C.BytesWrapper, 0)
+	for _, message := range messages {
+		fromBytes := newBytesBufferFromBytes(message)
+		messageBytes = append(messageBytes, fromBytes.instance)
+	}
+	pubKeys := make([]C.BytesWrapper, 0)
+	for _, key := range publicKeys {
+		pubKeys = append(pubKeys, key.instance.instance)
+	}
+
+	ok := C.PopSchemeMPLWrapperAggregateVerify(p.instance,
+		(*C.BytesWrapper)(unsafe.Pointer(&pubKeys[0])), C.int(keyNum),
+		(*C.BytesWrapper)(unsafe.Pointer(&messageBytes[0])), C.int(msgNum),
+		signature.instance.instance)
+	if ok > 0 {
+		return true, nil
+	}
+	return false, nil
 }
 
 func (p PopSchemeMPL) DeriveChildSk(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
-	panic("implement me")
+	sk := C.PopSchemeMPLDeriveChildSk(p.instance, privateKey.instance, C.uint(index))
+	return &PrivateKey{
+		instance: sk,
+	}, nil
 }
 
 func (p PopSchemeMPL) DeriveChildSkUnhardened(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
-	panic("implement me")
+	sk := C.PopSchemeMPLDeriveChildSkUnhardened(p.instance, privateKey.instance, C.uint32_t(index))
+	return &PrivateKey{
+		instance: sk,
+	}, nil
 }
 
 func (p PopSchemeMPL) DeriveChildPkUnhardened(publicKey *G1Element, index uint32) (*G1Element, error) {
-	panic("implement me")
+	b := C.PopSchemeMPLDeriveChildPkUnhardened(p.instance, publicKey.instance.instance, C.uint32_t(index))
+	wrapper := newBytesBufferFromBytesWrapper(b)
+	return newG1ElementFromBytesBuffer(wrapper)
 }
 
 type HKDF256HASH [32]byte

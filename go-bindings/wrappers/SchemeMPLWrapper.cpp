@@ -113,6 +113,34 @@ int BasicSchemeMPLWrapperVerify(BasicSchemeMPLWrapper basicScheme,BytesWrapper p
     return 0;
 }
 
+PrivateKeyWrapper BasicSchemeMPLDeriveChildSk(
+    BasicSchemeMPLWrapper basicScheme,PrivateKeyWrapper master,uint32_t index){
+    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL*) basicScheme;
+    bls::PrivateKey * masterPrivateKey = (bls::PrivateKey*) master;
+    bls::PrivateKey childSk = (*basicSchemeMpl).DeriveChildSk(*masterPrivateKey,index);
+    bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
+    return (void *)(childPrivateKey);
+}
+
+PrivateKeyWrapper BasicSchemeMPLDeriveChildSkUnhardened(
+    BasicSchemeMPLWrapper basicScheme,PrivateKeyWrapper master,uint32_t index){
+    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL*) basicScheme;
+    bls::PrivateKey * masterPrivateKey = (bls::PrivateKey*) master;
+    bls::PrivateKey childSk = (*basicSchemeMpl).DeriveChildSkUnhardened(*masterPrivateKey,index);
+    bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
+    return (void *)(childPrivateKey);
+}
+
+BytesWrapper BasicSchemeMPLDeriveChildPkUnhardened(
+    BasicSchemeMPLWrapper basicScheme,BytesWrapper master,uint32_t index){
+     bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL*) basicScheme;
+     bls::G1Element * masterPublicKey = (bls::G1Element*) master;
+     bls::G1Element childPk = (*basicSchemeMpl).DeriveChildPkUnhardened(*masterPublicKey,index);
+     std::vector<uint8_t> pk = childPk.Serialize();
+     return BytesWrapperInit(pk.data(),pk.size());
+}
+
+
 
 AugSchemeMPLWrapper AugSchemeMPLWrapperInit(){
     bls::AugSchemeMPL *augSchemeMpl = new bls::AugSchemeMPL();
@@ -184,6 +212,24 @@ PrivateKeyWrapper AugSchemeMPLDeriveChildSk(AugSchemeMPLWrapper augScheme,Privat
     return (void *)(childPrivateKey);
 }
 
+PrivateKeyWrapper AugSchemeMPLDeriveChildSkUnhardened(
+    AugSchemeMPLWrapper augScheme,PrivateKeyWrapper master,uint32_t index){
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
+    bls::PrivateKey * masterPrivateKey = (bls::PrivateKey*) master;
+    bls::PrivateKey childSk = (*augSchemeMpl).DeriveChildSkUnhardened(*masterPrivateKey,index);
+    bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
+    return (void *)(childPrivateKey);
+}
+
+BytesWrapper AugSchemeMPLDeriveChildPkUnhardened(
+    AugSchemeMPLWrapper augScheme,BytesWrapper master,uint32_t index){
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
+    bls::G1Element * masterPublicKey = (bls::G1Element*) master;
+    bls::G1Element childPk = (*augSchemeMpl).DeriveChildPkUnhardened(*masterPublicKey,index);
+    std::vector<uint8_t> pk = childPk.Serialize();
+    return BytesWrapperInit(pk.data(),pk.size());
+}
+
 BytesWrapper AugSchemeMPLWrapperAggregateG1Element(
     AugSchemeMPLWrapper augScheme,
     const BytesWrapper * publicKeys,int num){
@@ -238,7 +284,6 @@ int AugSchemeMPLWrapperAggregateVerify(
     }else{
         return 0;
     }
-
 }
 
 PopSchemeMPLWrapper PopSchemeMPLWrapperInit(){
@@ -252,4 +297,117 @@ PrivateKeyWrapper PopSchemeMPLWrapperKeyGen(PopSchemeMPLWrapper popScheme,const 
     std::vector<uint8_t> keySeed(seed,seed+size);
     bls::PrivateKey *privateKey = new bls::PrivateKey(popSchemeMpl->KeyGen(keySeed));
     return (PrivateKeyWrapper)(privateKey);
+}
+
+BytesWrapper PopSchemeMPLWrapperSign(
+    PopSchemeMPLWrapper popScheme,
+    PrivateKeyWrapper privateKeyWrapper,
+    const uint8_t * message,size_t size){
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
+    bls::PrivateKey *privateKey = (bls::PrivateKey*) privateKeyWrapper;
+    vector<uint8_t> msg(message,message+size);
+    bls::G2Element sig = (*popSchemeMpl).Sign(*privateKey,msg);
+    std::vector<uint8_t> sigBytes = sig.Serialize();
+    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
+}
+
+int PopSchemeMPLWrapperVerify(
+    PopSchemeMPLWrapper popScheme,BytesWrapper publicKeyBytes,
+    const uint8_t * message,size_t size,BytesWrapper signatureBytes){
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
+    bls::Bytes *pubBytes = (bls::Bytes*)publicKeyBytes;
+    bls::Bytes *sigBytes = (bls::Bytes*)signatureBytes;
+    bls::G2Element signature;
+    bls::G1Element publicKey;
+    try{
+        signature = bls::G2Element::FromBytes(*sigBytes);
+        publicKey = bls::G1Element::FromBytes(*pubBytes);
+    }catch(...){
+        return 0;
+    }
+    vector<uint8_t> msg(message,message+size);
+    if ((*popSchemeMpl).Verify(publicKey,msg,signature)){
+        return 1;
+    }
+    return 0;
+}
+
+BytesWrapper PopSchemeMPLWrapperAggregateG1Element(
+    PopSchemeMPLWrapper popScheme,
+    const BytesWrapper * publicKeys,int num){
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
+    std::vector<bls::G1Element> pubKeys;
+    for (int i = 0 ;i < num ;i++){
+        bls::Bytes *bytes =  (bls::Bytes*)(publicKeys[i]);
+        bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
+        pubKeys.push_back(g1);
+    }
+    bls::G1Element g1 = (*popSchemeMpl).Aggregate(pubKeys);
+    vector<uint8_t> sigBytes = g1.Serialize();
+    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
+}
+
+BytesWrapper PopSchemeMPLWrapperAggregateG2Element(
+    PopSchemeMPLWrapper popScheme,const BytesWrapper * signatures,int num){
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
+    std::vector<bls::G2Element> signs;
+    for (int i = 0 ;i < num ;i++){
+        bls::Bytes *bytes =  (bls::Bytes*)(signatures[i]);
+        bls::G2Element g2 = bls::G2Element::FromBytes(*bytes);
+        signs.push_back(g2);
+    }
+    bls::G2Element g2 = (*popSchemeMpl).Aggregate(signs);
+    vector<uint8_t> sigBytes = g2.Serialize();
+    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
+}
+
+int PopSchemeMPLWrapperAggregateVerify(
+    PopSchemeMPLWrapper popScheme,const BytesWrapper * publicKeys,int keyNum,
+    const BytesWrapper * messages,int msgNum, const BytesWrapper signature){
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
+    std::vector<bls::G1Element> pubKeys;
+    for (int i = 0 ;i < keyNum ;i++){
+        bls::Bytes *bytes =  (bls::Bytes*)(publicKeys[i]);
+        bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
+        pubKeys.push_back(g1);
+    }
+    bls::Bytes *g2 = (bls::Bytes*)signature;
+    bls::G2Element sig = bls::G2Element::FromBytes(*g2);
+    std::vector<bls::Bytes>msgs;
+    for (int i = 0 ;i < msgNum ;i++){
+        bls::Bytes *bytes =  (bls::Bytes*)(messages[i]);
+        msgs.push_back(*bytes);
+    }
+    if (popSchemeMpl->AggregateVerify(pubKeys,msgs,sig)){
+        return 1;
+    }else{
+        return 0;
+    }
+}
+
+PrivateKeyWrapper PopSchemeMPLDeriveChildSk(
+    PopSchemeMPLWrapper popScheme,PrivateKeyWrapper master,uint32_t index){
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
+    bls::PrivateKey * masterPrivateKey = (bls::PrivateKey*) master;
+    bls::PrivateKey childSk = (*popSchemeMpl).DeriveChildSk(*masterPrivateKey,index);
+    bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
+    return (void *)(childPrivateKey);
+}
+
+PrivateKeyWrapper PopSchemeMPLDeriveChildSkUnhardened(
+    PopSchemeMPLWrapper popScheme,PrivateKeyWrapper master,uint32_t index){
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
+    bls::PrivateKey * masterPrivateKey = (bls::PrivateKey*) master;
+    bls::PrivateKey childSk = (*popSchemeMpl).DeriveChildSkUnhardened(*masterPrivateKey,index);
+    bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
+    return (void *)(childPrivateKey);
+}
+
+BytesWrapper PopSchemeMPLDeriveChildPkUnhardened(
+    PopSchemeMPLWrapper popScheme,BytesWrapper master,uint32_t index){
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
+    bls::G1Element * masterPublicKey = (bls::G1Element*) master;
+    bls::G1Element childPk = (*popSchemeMpl).DeriveChildPkUnhardened(*masterPublicKey,index);
+    std::vector<uint8_t> pk = childPk.Serialize();
+    return BytesWrapperInit(pk.data(),pk.size());
 }
