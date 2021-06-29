@@ -16,10 +16,12 @@
 #ifndef BLS_GO_BINDINGS_ELEMENT_WRAPPER_H
 #define BLS_GO_BINDINGS_ELEMENT_WRAPPER_H
 #include "BytesWrapper.h"
+#include <stdint.h>
+#include <stddef.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+uint32_t G1ElementGetFingerprint(BytesWrapper publicKeyWrapper);
 #ifdef __cplusplus
 }
 #endif

@@ -205,6 +205,11 @@ func (g1 *G1Element) Size() int {
 	return G1ElementSize
 }
 
+func (g1 G1Element) GetFingerprint() (uint32,error) {
+	fingerpint := C.G1ElementGetFingerprint(g1.instance.instance)
+	return uint32(fingerpint),nil
+}
+
 func (g1 *G1Element) String() string {
 	return hex.EncodeToString(g1.data[:])
 }

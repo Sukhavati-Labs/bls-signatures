@@ -16,3 +16,4 @@
 #include "wrappers/PrivateKeyWrapper.h"
 #include "wrappers/SchemeMPLWrapper.h"
 #include "wrappers/UtilWrapper.h"
+#include "wrappers/ElementWrapper.h"

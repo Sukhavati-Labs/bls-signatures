@@ -12,5 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
+#include "relic.h"
+#include "../../src/util.hpp"
+#include "../../src/bls.hpp"
+#include "BytesWrapper.h"
 #include "ElementWrapper.h"
+
+uint32_t G1ElementGetFingerprint(BytesWrapper publicKeyWrapper){
+    bls::Bytes *b = (bls::Bytes*)publicKeyWrapper;
+    bls::G1Element g1 = bls::G1Element::FromBytes(*b);
+    return  g1.GetFingerprint();
+}
