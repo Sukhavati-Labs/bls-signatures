@@ -699,8 +699,14 @@ type HKDF256HASH [32]byte
 type HKDF256 struct {
 }
 
-func HKDF256Extract(salt []byte, ikm []byte) *HKDF256HASH {
-	return nil
+func HKDF256Extract(salt []byte, ikm []byte) (*HKDF256HASH,error) {
+	saltBytes := newBytesBufferFromBytes(salt)
+	ikmBytes := newBytesBufferFromBytes(ikm)
+	h:= C.HKDF256Extract(saltBytes.instance,ikmBytes.instance)
+	wrapper := newBytesBufferFromBytesWrapper(h)
+	var outHash HKDF256HASH;
+	copy(outHash[:],wrapper.Bytes())
+	return &outHash,nil
 }
 
 func HKDF256Expand(prk []byte, info []byte) []byte {

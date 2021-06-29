@@ -12,9 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "wrappers/BytesWrapper.h"
-#include "wrappers/PrivateKeyWrapper.h"
-#include "wrappers/SchemeMPLWrapper.h"
-#include "wrappers/UtilWrapper.h"
-#include "wrappers/ElementWrapper.h"
-#include "wrappers/HKDFWrapper.h"
+
+#ifndef BLS_GO_BINDINGS_HKDF_WRAPPER_H
+#define BLS_GO_BINDINGS_HKDF_WRAPPER_H
+#include "BytesWrapper.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+BytesWrapper HKDF256Extract(BytesWrapper salt,BytesWrapper ikm);
+BytesWrapper HKDF256Expand(BytesWrapper prk,BytesWrapper info);
+#ifdef __cplusplus
+}
+#endif
+#endif  // BLS_GO_BINDINGS_HKDF_WRAPPER_H
