@@ -29,6 +29,8 @@ void PrivateKeyWrapperFree(PrivateKeyWrapper privateKeyWrapper);
 
 int PrivateKeyWrapperIsZero(PrivateKeyWrapper privateKeyWrapper);
 
+int PrivateKeyWrapperEquals(PrivateKeyWrapper privateKeyWrapper,PrivateKeyWrapper privateKeyOtherWrapper);
+
 PrivateKeyWrapper PrivateKeyWrapperAggregate(const PrivateKeyWrapper *keys,int num);
 
 BytesWrapper PrivateKeyWrapperSerialize(PrivateKeyWrapper privateKeyWrapper);
