@@ -691,6 +691,12 @@ func (p PopSchemeMPL) DeriveChildPkUnhardened(publicKey *G1Element, index uint32
 	return newG1ElementFromBytesBuffer(wrapper)
 }
 
+func (p PopSchemeMPL) PopProve(privateKey *PrivateKey) (*G2Element, error) {
+	b := C.PopSchemeMPLPopProve(p.instance, privateKey.instance)
+	wrapper := newBytesBufferFromBytesWrapper(b)
+	return newG2ElementFromBytesBuffer(wrapper)
+}
+
 type HKDF256HASH [32]byte
 
 //HKDF256 Implements HKDF as specified in RFC5869:
@@ -699,14 +705,14 @@ type HKDF256HASH [32]byte
 type HKDF256 struct {
 }
 
-func HKDF256Extract(salt []byte, ikm []byte) (*HKDF256HASH,error) {
+func HKDF256Extract(salt []byte, ikm []byte) (*HKDF256HASH, error) {
 	saltBytes := newBytesBufferFromBytes(salt)
 	ikmBytes := newBytesBufferFromBytes(ikm)
-	h:= C.HKDF256Extract(saltBytes.instance,ikmBytes.instance)
+	h := C.HKDF256Extract(saltBytes.instance, ikmBytes.instance)
 	wrapper := newBytesBufferFromBytesWrapper(h)
-	var outHash HKDF256HASH;
-	copy(outHash[:],wrapper.Bytes())
-	return &outHash,nil
+	var outHash HKDF256HASH
+	copy(outHash[:], wrapper.Bytes())
+	return &outHash, nil
 }
 
 func HKDF256Expand(prk []byte, info []byte) []byte {

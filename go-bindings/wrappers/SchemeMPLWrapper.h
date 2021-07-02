@@ -151,6 +151,8 @@ PrivateKeyWrapper PopSchemeMPLDeriveChildSkUnhardened(
 BytesWrapper PopSchemeMPLDeriveChildPkUnhardened(
     PopSchemeMPLWrapper popScheme,BytesWrapper master,uint32_t index);
 
+BytesWrapper PopSchemeMPLPopProve(PopSchemeMPLWrapper popScheme,PrivateKeyWrapper privateKey);
+
 #ifdef __cplusplus
 }
 #endif

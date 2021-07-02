@@ -411,3 +411,12 @@ BytesWrapper PopSchemeMPLDeriveChildPkUnhardened(
     std::vector<uint8_t> pk = childPk.Serialize();
     return BytesWrapperInit(pk.data(),pk.size());
 }
+
+
+BytesWrapper PopSchemeMPLPopProve(PopSchemeMPLWrapper popScheme,PrivateKeyWrapper privateKey){
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
+    bls::PrivateKey * key = (bls::PrivateKey*) privateKey;
+    bls::G2Element prove = (*popSchemeMpl).PopProve(*key);
+    std::vector<uint8_t> pk = prove.Serialize();
+    return BytesWrapperInit(pk.data(),pk.size());
+}
