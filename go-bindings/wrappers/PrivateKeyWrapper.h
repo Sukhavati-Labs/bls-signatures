@@ -18,12 +18,13 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "BytesWrapper.h"
+#include "GoWrapper.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 typedef void *PrivateKeyWrapper;
 
-PrivateKeyWrapper PrivateKeyWrapperFromBytes(const uint8_t *buffer,size_t size);
+HandleRetWrapper PrivateKeyWrapperFromBytes(const uint8_t *buffer,size_t size);
 
 void PrivateKeyWrapperFree(PrivateKeyWrapper privateKeyWrapper);
 

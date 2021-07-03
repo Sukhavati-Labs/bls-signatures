@@ -103,8 +103,13 @@ type PrivateKey struct {
 func NewPrivateKeyFromBytes(bytes []byte) (*PrivateKey, error) {
 	cBuffer, size := bytesToCUint8Bytes(bytes)
 	defer C.free(unsafe.Pointer(cBuffer))
+	ret := C.PrivateKeyWrapperFromBytes(cBuffer, size)
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
 	privateKey := &PrivateKey{
-		instance: C.PrivateKeyWrapperFromBytes(cBuffer, size),
+		instance: (C.PrivateKeyWrapper)(ret.handle),
 	}
 	return privateKey, nil
 }
