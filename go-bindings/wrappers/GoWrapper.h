@@ -21,6 +21,11 @@
 //    const char * ptrErr; // error message info
 //};
 
+typedef struct _HandleRet {
+    void * handle;    // return void * pointer handle
+    const char * err; // error message info ,need free
+} HandleRetWrapper;
+
 
 
 #endif  // BLS_GO_BINDINGS_GO_WRAPPER_H

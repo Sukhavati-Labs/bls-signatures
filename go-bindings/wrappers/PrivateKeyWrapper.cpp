@@ -19,10 +19,16 @@
 #include "../../src/util.hpp"
 #include "../../src/privatekey.hpp"
 
-PrivateKeyWrapper PrivateKeyWrapperFromBytes(const uint8_t *buffer,size_t size){
+HandleRetWrapper PrivateKeyWrapperFromBytes(const uint8_t *buffer,size_t size){
     std::vector<uint8_t>b(buffer,buffer+size);
-    bls::PrivateKey *privateKey = new bls::PrivateKey(bls::PrivateKey::FromByteVector(b));
-    return reinterpret_cast<void *>(privateKey);
+    HandleRetWrapper ret = {0};
+    try {
+        bls::PrivateKey *privateKey = new bls::PrivateKey(bls::PrivateKey::FromByteVector(b));
+        ret.handle = reinterpret_cast<void *>(privateKey);
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
 
 void PrivateKeyWrapperFree(PrivateKeyWrapper privateKeyWrapper){
