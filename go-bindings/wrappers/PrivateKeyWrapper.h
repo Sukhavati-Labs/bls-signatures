@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #ifndef BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H
 #define BLS_GO_BINDINGS_PRIVATE_KEY_WRAPPER_H
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
+
 #include "BytesWrapper.h"
 #include "GoWrapper.h"
 #ifdef __cplusplus
@@ -24,20 +24,39 @@ extern "C" {
 #endif
 typedef void *PrivateKeyWrapper;
 
-HandleRetWrapper PrivateKeyWrapperFromBytes(const uint8_t *buffer,size_t size);
+HandleRetWrapper PrivateKeyWrapperFromBytes(const uint8_t *buffer, size_t size);
 
 void PrivateKeyWrapperFree(PrivateKeyWrapper privateKeyWrapper);
 
-int PrivateKeyWrapperIsZero(PrivateKeyWrapper privateKeyWrapper);
+HandleRetWrapper PrivateKeyWrapperGetG2Power(
+    PrivateKeyWrapper privateKeyWrapper,
+    BytesWrapper g2ElementWrapper);
 
-int PrivateKeyWrapperEquals(PrivateKeyWrapper privateKeyWrapper,PrivateKeyWrapper privateKeyOtherWrapper);
+IntRetWrapper PrivateKeyWrapperIsZero(PrivateKeyWrapper privateKeyWrapper);
 
-PrivateKeyWrapper PrivateKeyWrapperAggregate(const PrivateKeyWrapper *keys,int num);
+IntRetWrapper PrivateKeyWrapperEquals(
+    PrivateKeyWrapper privateKeyWrapper,
+    PrivateKeyWrapper privateKeyOtherWrapper);
+
+HandleRetWrapper PrivateKeyWrapperAggregate(PrivateKeyWrapper *keys, int num);
+
+HandleRetWrapper PrivateKeyWrapperMulG1Element(
+    PrivateKeyWrapper privateKeyWrapper,
+    BytesWrapper g1ElementWrapper);
+
+HandleRetWrapper PrivateKeyWrapperMulG2Element(
+    PrivateKeyWrapper privateKeyWrapper,
+    BytesWrapper g2ElementWrapper);
 
 BytesWrapper PrivateKeyWrapperSerialize(PrivateKeyWrapper privateKeyWrapper);
 
-BytesWrapper PrivateKeyWrapperGetG1Element(PrivateKeyWrapper privateKeyWrapper);
+HandleRetWrapper PrivateKeyWrapperGetG1Element(
+    PrivateKeyWrapper privateKeyWrapper);
 
+HandleRetWrapper PrivateKeyWrapperSignG2(
+    PrivateKeyWrapper privateKeyWrapper,
+    BytesWrapper msgWrapper,
+    BytesWrapper dstWrapper);
 
 #ifdef __cplusplus
 }

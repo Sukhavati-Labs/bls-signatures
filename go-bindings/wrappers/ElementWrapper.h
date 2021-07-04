@@ -12,17 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #ifndef BLS_GO_BINDINGS_ELEMENT_WRAPPER_H
 #define BLS_GO_BINDINGS_ELEMENT_WRAPPER_H
-#include "BytesWrapper.h"
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
+
+#include "BytesWrapper.h"
+#include "GoWrapper.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
+HandleRetWrapper G1ElementGenerator();
 uint32_t G1ElementGetFingerprint(BytesWrapper publicKeyWrapper);
-BytesWrapper G1ElementAdd(BytesWrapper publicKeyWrapper,BytesWrapper publicKeyAddendWrapper);
+BytesWrapper G1ElementAdd(
+    BytesWrapper publicKeyWrapper,
+    BytesWrapper publicKeyAddendWrapper);
 #ifdef __cplusplus
 }
 #endif

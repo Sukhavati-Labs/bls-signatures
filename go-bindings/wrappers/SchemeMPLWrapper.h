@@ -11,147 +11,194 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #ifndef BLS_GO_BINDINGS_SCHEME_MPL_WRAPPER_H
 #define BLS_GO_BINDINGS_SCHEME_MPL_WRAPPER_H
 
-#include <stdint.h>
 #include <stddef.h>
-#include "PrivateKeyWrapper.h"
+#include <stdint.h>
+
 #include "BytesWrapper.h"
+#include "PrivateKeyWrapper.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
-typedef void * BasicSchemeMPLWrapper;
+typedef void* BasicSchemeMPLWrapper;
 
 BasicSchemeMPLWrapper BasicSchemeMPLWrapperInit();
 
 PrivateKeyWrapper BasicSchemeMPLWrapperKeyGen(
-    BasicSchemeMPLWrapper basicScheme,const uint8_t * seed,size_t size);
+    BasicSchemeMPLWrapper basicScheme,
+    const uint8_t* seed,
+    size_t size);
 
 BytesWrapper BasicSchemeMPLWrapperSkToPk();
 
 BytesWrapper BasicSchemeMPLWrapperAggregateG1Element(
     BasicSchemeMPLWrapper basicScheme,
-    const BytesWrapper * publicKeys,int num);
+    const BytesWrapper* publicKeys,
+    int num);
 
 BytesWrapper BasicSchemeMPLWrapperAggregateG2Element(
     BasicSchemeMPLWrapper basicScheme,
-    const BytesWrapper * signatures,int num);
+    const BytesWrapper* signatures,
+    int num);
 
 int BasicSchemeMPLWrapperAggregateVerify(
     BasicSchemeMPLWrapper basicScheme,
-    const BytesWrapper * publicKeys,int keyNum,
-    const BytesWrapper * messages,int msgNum,
+    const BytesWrapper* publicKeys,
+    int keyNum,
+    const BytesWrapper* messages,
+    int msgNum,
     const BytesWrapper signature);
 
 PrivateKeyWrapper BasicSchemeMPLDeriveChildSk(
-    BasicSchemeMPLWrapper basicScheme,PrivateKeyWrapper master,uint32_t index);
+    BasicSchemeMPLWrapper basicScheme,
+    PrivateKeyWrapper master,
+    uint32_t index);
 
 PrivateKeyWrapper BasicSchemeMPLDeriveChildSkUnhardened(
-    BasicSchemeMPLWrapper basicScheme,PrivateKeyWrapper master,uint32_t index);
+    BasicSchemeMPLWrapper basicScheme,
+    PrivateKeyWrapper master,
+    uint32_t index);
 
 BytesWrapper BasicSchemeMPLDeriveChildPkUnhardened(
-    BasicSchemeMPLWrapper basicScheme,BytesWrapper master,uint32_t index);
-
+    BasicSchemeMPLWrapper basicScheme,
+    BytesWrapper master,
+    uint32_t index);
 
 BytesWrapper BasicSchemeMPLWrapperSign(
     BasicSchemeMPLWrapper basicScheme,
     PrivateKeyWrapper privateKeyWrapper,
-    const uint8_t * message,size_t size);
+    const uint8_t* message,
+    size_t size);
 
 int BasicSchemeMPLWrapperVerify(
     BasicSchemeMPLWrapper basicScheme,
     BytesWrapper publicKeyBytes,
-    const uint8_t * message,size_t size,
+    const uint8_t* message,
+    size_t size,
     BytesWrapper signatureBytes);
 
-typedef void * AugSchemeMPLWrapper;
+typedef void* AugSchemeMPLWrapper;
 
 AugSchemeMPLWrapper AugSchemeMPLWrapperInit();
 
 PrivateKeyWrapper AugSchemeMPLWrapperKeyGen(
     AugSchemeMPLWrapper augScheme,
-    const uint8_t * seed,size_t size);
+    const uint8_t* seed,
+    size_t size);
 
 BytesWrapper AugSchemeMPLWrapperSign(
     AugSchemeMPLWrapper augScheme,
     PrivateKeyWrapper privateKeyWrapper,
-    const uint8_t * message,size_t size);
+    const uint8_t* message,
+    size_t size);
 
 BytesWrapper AugSchemeMPLWrapperPrependingSign(
     AugSchemeMPLWrapper augScheme,
     PrivateKeyWrapper privateKeyWrapper,
-    const uint8_t * message,size_t size,
+    const uint8_t* message,
+    size_t size,
     BytesWrapper publicKeyWrapper);
-
 
 BytesWrapper AugSchemeMPLWrapperAggregateG1Element(
     AugSchemeMPLWrapper augScheme,
-    const BytesWrapper * publicKeys,int num);
+    const BytesWrapper* publicKeys,
+    int num);
 
 BytesWrapper AugSchemeMPLWrapperAggregateG2Element(
     AugSchemeMPLWrapper augScheme,
-    const BytesWrapper * signatures,int num);
+    const BytesWrapper* signatures,
+    int num);
 
 int AugSchemeMPLWrapperVerify(
     AugSchemeMPLWrapper augScheme,
     BytesWrapper publicKeyBytes,
-    const uint8_t * message,size_t size,
+    const uint8_t* message,
+    size_t size,
     BytesWrapper signatureBytes);
 
 int AugSchemeMPLWrapperAggregateVerify(
     AugSchemeMPLWrapper augScheme,
-    const BytesWrapper * publicKeys,int keyNum,
-    const BytesWrapper * messages,int msgNum,
+    const BytesWrapper* publicKeys,
+    int keyNum,
+    const BytesWrapper* messages,
+    int msgNum,
     const BytesWrapper signature);
 
 PrivateKeyWrapper AugSchemeMPLDeriveChildSk(
-    AugSchemeMPLWrapper augScheme,PrivateKeyWrapper master,uint32_t index);
+    AugSchemeMPLWrapper augScheme,
+    PrivateKeyWrapper master,
+    uint32_t index);
 
 PrivateKeyWrapper AugSchemeMPLDeriveChildSkUnhardened(
-    AugSchemeMPLWrapper augScheme,PrivateKeyWrapper master,uint32_t index);
+    AugSchemeMPLWrapper augScheme,
+    PrivateKeyWrapper master,
+    uint32_t index);
 
 BytesWrapper AugSchemeMPLDeriveChildPkUnhardened(
-    AugSchemeMPLWrapper augScheme,BytesWrapper master,uint32_t index);
+    AugSchemeMPLWrapper augScheme,
+    BytesWrapper master,
+    uint32_t index);
 
-typedef void * PopSchemeMPLWrapper;
+typedef void* PopSchemeMPLWrapper;
 
 PopSchemeMPLWrapper PopSchemeMPLWrapperInit();
 
 PrivateKeyWrapper PopSchemeMPLWrapperKeyGen(
-    PopSchemeMPLWrapper popScheme,const uint8_t * seed,size_t size);
+    PopSchemeMPLWrapper popScheme,
+    const uint8_t* seed,
+    size_t size);
 
 BytesWrapper PopSchemeMPLWrapperSign(
-    PopSchemeMPLWrapper popScheme,PrivateKeyWrapper privateKeyWrapper,
-    const uint8_t * message,size_t size);
+    PopSchemeMPLWrapper popScheme,
+    PrivateKeyWrapper privateKeyWrapper,
+    const uint8_t* message,
+    size_t size);
 
 int PopSchemeMPLWrapperVerify(
-    PopSchemeMPLWrapper popScheme,BytesWrapper publicKeyBytes,
-    const uint8_t * message,size_t size,BytesWrapper signatureBytes);
+    PopSchemeMPLWrapper popScheme,
+    BytesWrapper publicKeyBytes,
+    const uint8_t* message,
+    size_t size,
+    BytesWrapper signatureBytes);
 
 BytesWrapper PopSchemeMPLWrapperAggregateG1Element(
     PopSchemeMPLWrapper popScheme,
-    const BytesWrapper * publicKeys,int num);
+    const BytesWrapper* publicKeys,
+    int num);
 
 BytesWrapper PopSchemeMPLWrapperAggregateG2Element(
     PopSchemeMPLWrapper popScheme,
-    const BytesWrapper * signatures,int num);
+    const BytesWrapper* signatures,
+    int num);
 
 int PopSchemeMPLWrapperAggregateVerify(
-    PopSchemeMPLWrapper popScheme,const BytesWrapper * publicKeys,int keyNum,
-    const BytesWrapper * messages,int msgNum, const BytesWrapper signature);
+    PopSchemeMPLWrapper popScheme,
+    const BytesWrapper* publicKeys,
+    int keyNum,
+    const BytesWrapper* messages,
+    int msgNum,
+    const BytesWrapper signature);
 
 PrivateKeyWrapper PopSchemeMPLDeriveChildSk(
-    PopSchemeMPLWrapper popScheme,PrivateKeyWrapper master,uint32_t index);
+    PopSchemeMPLWrapper popScheme,
+    PrivateKeyWrapper master,
+    uint32_t index);
 
 PrivateKeyWrapper PopSchemeMPLDeriveChildSkUnhardened(
-    PopSchemeMPLWrapper popScheme,PrivateKeyWrapper master,uint32_t index);
+    PopSchemeMPLWrapper popScheme,
+    PrivateKeyWrapper master,
+    uint32_t index);
 
 BytesWrapper PopSchemeMPLDeriveChildPkUnhardened(
-    PopSchemeMPLWrapper popScheme,BytesWrapper master,uint32_t index);
+    PopSchemeMPLWrapper popScheme,
+    BytesWrapper master,
+    uint32_t index);
 
-BytesWrapper PopSchemeMPLPopProve(PopSchemeMPLWrapper popScheme,PrivateKeyWrapper privateKey);
+BytesWrapper PopSchemeMPLPopProve(
+    PopSchemeMPLWrapper popScheme,
+    PrivateKeyWrapper privateKey);
 
 #ifdef __cplusplus
 }

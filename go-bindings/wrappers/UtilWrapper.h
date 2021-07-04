@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #ifndef BLS_GO_BINDINGS_UTIL_WRAPPER_H
 #define BLS_GO_BINDINGS_UTIL_WRAPPER_H
 #ifdef __cplusplus
@@ -22,6 +21,4 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif //BLS_GO_BINDINGS_UTIL_WRAPPER_H
-
-
+#endif  // BLS_GO_BINDINGS_UTIL_WRAPPER_H

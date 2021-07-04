@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #ifndef BLS_GO_BINDINGS_HKDF_WRAPPER_H
 #define BLS_GO_BINDINGS_HKDF_WRAPPER_H
 #include "BytesWrapper.h"
@@ -20,8 +19,8 @@
 extern "C" {
 #endif
 
-BytesWrapper HKDF256Extract(BytesWrapper salt,BytesWrapper ikm);
-BytesWrapper HKDF256Expand(BytesWrapper prk,BytesWrapper info);
+BytesWrapper HKDF256Extract(BytesWrapper salt, BytesWrapper ikm);
+BytesWrapper HKDF256Expand(BytesWrapper prk, BytesWrapper info);
 #ifdef __cplusplus
 }
 #endif
