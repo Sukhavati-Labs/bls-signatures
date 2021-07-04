@@ -14,319 +14,397 @@
 #include "SchemeMPLWrapper.h"
 
 #include "../../src/schemes.hpp"
-#include "PrivateKeyWrapper.h"
 #include "../../src/util.hpp"
+#include "PrivateKeyWrapper.h"
 
-
-BasicSchemeMPLWrapper BasicSchemeMPLWrapperInit(){
-   bls::BasicSchemeMPL *basicSchemeMpl = new bls::BasicSchemeMPL();
-   return (BasicSchemeMPLWrapper)(basicSchemeMpl);
+BasicSchemeMPLWrapper BasicSchemeMPLWrapperInit()
+{
+    bls::BasicSchemeMPL *basicSchemeMpl = new bls::BasicSchemeMPL();
+    return (BasicSchemeMPLWrapper)(basicSchemeMpl);
 }
 
-PrivateKeyWrapper BasicSchemeMPLWrapperKeyGen(BasicSchemeMPLWrapper basicScheme,const uint8_t * seedBuffer,size_t size){
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL*) basicScheme;
-    vector<uint8_t> seed(seedBuffer,seedBuffer+size);
-    bls::PrivateKey *privateKey = new bls::PrivateKey((*basicSchemeMpl).KeyGen(seed));
+PrivateKeyWrapper BasicSchemeMPLWrapperKeyGen(
+    BasicSchemeMPLWrapper basicScheme,
+    const uint8_t *seedBuffer,
+    size_t size)
+{
+    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
+    vector<uint8_t> seed(seedBuffer, seedBuffer + size);
+    bls::PrivateKey *privateKey =
+        new bls::PrivateKey((*basicSchemeMpl).KeyGen(seed));
     return (PrivateKeyWrapper)(privateKey);
 }
 
-BytesWrapper BasicSchemeMPLWrapperAggregateG2Element(BasicSchemeMPLWrapper basicScheme,const BytesWrapper * signatures,int num){
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL*) basicScheme;
+BytesWrapper BasicSchemeMPLWrapperAggregateG2Element(
+    BasicSchemeMPLWrapper basicScheme,
+    const BytesWrapper *signatures,
+    int num)
+{
+    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
     std::vector<bls::G2Element> sigs;
-    for (int i = 0 ;i < num ;i++){
-        bls::Bytes *bytes =  (bls::Bytes*)(signatures[i]);
+    for (int i = 0; i < num; i++) {
+        bls::Bytes *bytes = (bls::Bytes *)(signatures[i]);
         bls::G2Element g2 = bls::G2Element::FromBytes(*bytes);
         sigs.push_back(g2);
     }
     bls::G2Element augG2 = (*basicSchemeMpl).Aggregate(sigs);
     std::vector<uint8_t> g2 = augG2.Serialize();
-    return BytesWrapperInit(g2.data(),g2.size());
+    return BytesWrapperInit(g2.data(), g2.size());
 }
 
-BytesWrapper BasicSchemeMPLWrapperAggregateG1Element(BasicSchemeMPLWrapper basicScheme,const BytesWrapper * publicKeys,int num){
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL*) basicScheme;
+BytesWrapper BasicSchemeMPLWrapperAggregateG1Element(
+    BasicSchemeMPLWrapper basicScheme,
+    const BytesWrapper *publicKeys,
+    int num)
+{
+    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
     std::vector<bls::G1Element> pubKeys;
-    for (int i = 0 ;i < num ;i++){
-        bls::Bytes *bytes =  (bls::Bytes*)(publicKeys[i]);
+    for (int i = 0; i < num; i++) {
+        bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
         bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
         pubKeys.push_back(g1);
     }
     bls::G1Element augG1 = (*basicSchemeMpl).Aggregate(pubKeys);
     std::vector<uint8_t> g1 = augG1.Serialize();
-    return BytesWrapperInit(g1.data(),g1.size());
+    return BytesWrapperInit(g1.data(), g1.size());
 }
 
 int BasicSchemeMPLWrapperAggregateVerify(
     BasicSchemeMPLWrapper basicScheme,
-    const BytesWrapper * publicKeys,int keyNum,
-    const BytesWrapper * messages,int msgNum,
-    const BytesWrapper signature){
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL*) basicScheme;
+    const BytesWrapper *publicKeys,
+    int keyNum,
+    const BytesWrapper *messages,
+    int msgNum,
+    const BytesWrapper signature)
+{
+    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
     std::vector<bls::G1Element> pubKeys;
-    for (int i = 0 ;i < keyNum ;i++){
-        bls::Bytes *bytes =  (bls::Bytes*)(publicKeys[i]);
+    for (int i = 0; i < keyNum; i++) {
+        bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
         bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
         pubKeys.push_back(g1);
     }
-    bls::Bytes *g2 = (bls::Bytes*)signature;
+    bls::Bytes *g2 = (bls::Bytes *)signature;
     bls::G2Element sig = bls::G2Element::FromBytes(*g2);
-    std::vector<bls::Bytes>msgs;
-    for (int i = 0 ;i < msgNum ;i++){
-        bls::Bytes *bytes =  (bls::Bytes*)(messages[i]);
+    std::vector<bls::Bytes> msgs;
+    for (int i = 0; i < msgNum; i++) {
+        bls::Bytes *bytes = (bls::Bytes *)(messages[i]);
         msgs.push_back(*bytes);
     }
-    if (basicSchemeMpl->AggregateVerify(pubKeys,msgs,sig)){
+    if (basicSchemeMpl->AggregateVerify(pubKeys, msgs, sig)) {
         return 1;
-    }else{
+    } else {
         return 0;
     }
-
 }
 
-BytesWrapper BasicSchemeMPLWrapperSign(BasicSchemeMPLWrapper basicScheme,PrivateKeyWrapper privateKeyWrapper,const uint8_t * message,size_t size){
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL*) basicScheme;
-    bls::PrivateKey *privateKey = (bls::PrivateKey*) privateKeyWrapper;
-    vector<uint8_t> msg(message,message+size);
-    bls::G2Element sig = (*basicSchemeMpl).Sign(*privateKey,msg);
+BytesWrapper BasicSchemeMPLWrapperSign(
+    BasicSchemeMPLWrapper basicScheme,
+    PrivateKeyWrapper privateKeyWrapper,
+    const uint8_t *message,
+    size_t size)
+{
+    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
+    bls::PrivateKey *privateKey = (bls::PrivateKey *)privateKeyWrapper;
+    vector<uint8_t> msg(message, message + size);
+    bls::G2Element sig = (*basicSchemeMpl).Sign(*privateKey, msg);
     std::vector<uint8_t> sigBytes = sig.Serialize();
-    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
+    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
 }
 
-
-int BasicSchemeMPLWrapperVerify(BasicSchemeMPLWrapper basicScheme,BytesWrapper publicKeyBytes,const uint8_t * message,size_t size,BytesWrapper signatureBytes){
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL*) basicScheme;
-    bls::Bytes *pubBytes = (bls::Bytes*)publicKeyBytes;
-    bls::Bytes *sigBytes = (bls::Bytes*)signatureBytes;
+int BasicSchemeMPLWrapperVerify(
+    BasicSchemeMPLWrapper basicScheme,
+    BytesWrapper publicKeyBytes,
+    const uint8_t *message,
+    size_t size,
+    BytesWrapper signatureBytes)
+{
+    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
+    bls::Bytes *pubBytes = (bls::Bytes *)publicKeyBytes;
+    bls::Bytes *sigBytes = (bls::Bytes *)signatureBytes;
     bls::G2Element signature;
     bls::G1Element publicKey;
-    try{
+    try {
         signature = bls::G2Element::FromBytes(*sigBytes);
         publicKey = bls::G1Element::FromBytes(*pubBytes);
-    }catch(...){
+    } catch (...) {
         return 0;
     }
-    vector<uint8_t> msg(message,message+size);
+    vector<uint8_t> msg(message, message + size);
 
-    if ((*basicSchemeMpl).Verify(publicKey,msg,signature)){
+    if ((*basicSchemeMpl).Verify(publicKey, msg, signature)) {
         return 1;
     }
     return 0;
 }
 
 PrivateKeyWrapper BasicSchemeMPLDeriveChildSk(
-    BasicSchemeMPLWrapper basicScheme,PrivateKeyWrapper master,uint32_t index){
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL*) basicScheme;
-    bls::PrivateKey * masterPrivateKey = (bls::PrivateKey*) master;
-    bls::PrivateKey childSk = (*basicSchemeMpl).DeriveChildSk(*masterPrivateKey,index);
+    BasicSchemeMPLWrapper basicScheme,
+    PrivateKeyWrapper master,
+    uint32_t index)
+{
+    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
+    bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
+    bls::PrivateKey childSk =
+        (*basicSchemeMpl).DeriveChildSk(*masterPrivateKey, index);
     bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
     return (void *)(childPrivateKey);
 }
 
 PrivateKeyWrapper BasicSchemeMPLDeriveChildSkUnhardened(
-    BasicSchemeMPLWrapper basicScheme,PrivateKeyWrapper master,uint32_t index){
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL*) basicScheme;
-    bls::PrivateKey * masterPrivateKey = (bls::PrivateKey*) master;
-    bls::PrivateKey childSk = (*basicSchemeMpl).DeriveChildSkUnhardened(*masterPrivateKey,index);
+    BasicSchemeMPLWrapper basicScheme,
+    PrivateKeyWrapper master,
+    uint32_t index)
+{
+    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
+    bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
+    bls::PrivateKey childSk =
+        (*basicSchemeMpl).DeriveChildSkUnhardened(*masterPrivateKey, index);
     bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
     return (void *)(childPrivateKey);
 }
 
 BytesWrapper BasicSchemeMPLDeriveChildPkUnhardened(
-    BasicSchemeMPLWrapper basicScheme,BytesWrapper master,uint32_t index){
-     bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL*) basicScheme;
-     bls::G1Element * masterPublicKey = (bls::G1Element*) master;
-     bls::G1Element childPk = (*basicSchemeMpl).DeriveChildPkUnhardened(*masterPublicKey,index);
-     std::vector<uint8_t> pk = childPk.Serialize();
-     return BytesWrapperInit(pk.data(),pk.size());
+    BasicSchemeMPLWrapper basicScheme,
+    BytesWrapper master,
+    uint32_t index)
+{
+    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
+    bls::G1Element *masterPublicKey = (bls::G1Element *)master;
+    bls::G1Element childPk =
+        (*basicSchemeMpl).DeriveChildPkUnhardened(*masterPublicKey, index);
+    std::vector<uint8_t> pk = childPk.Serialize();
+    return BytesWrapperInit(pk.data(), pk.size());
 }
 
-
-
-AugSchemeMPLWrapper AugSchemeMPLWrapperInit(){
+AugSchemeMPLWrapper AugSchemeMPLWrapperInit()
+{
     bls::AugSchemeMPL *augSchemeMpl = new bls::AugSchemeMPL();
     return (AugSchemeMPLWrapper)(augSchemeMpl);
 }
 
-PrivateKeyWrapper AugSchemeMPLWrapperKeyGen(AugSchemeMPLWrapper augScheme,const uint8_t * seed,size_t size){
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
-    std::vector<uint8_t> keySeed(seed,seed+size);
-    bls::PrivateKey *privateKey = new bls::PrivateKey(augSchemeMpl->KeyGen(keySeed));
+PrivateKeyWrapper AugSchemeMPLWrapperKeyGen(
+    AugSchemeMPLWrapper augScheme,
+    const uint8_t *seed,
+    size_t size)
+{
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
+    std::vector<uint8_t> keySeed(seed, seed + size);
+    bls::PrivateKey *privateKey =
+        new bls::PrivateKey(augSchemeMpl->KeyGen(keySeed));
     return (PrivateKeyWrapper)(privateKey);
 }
 
 BytesWrapper AugSchemeMPLWrapperSign(
     BasicSchemeMPLWrapper augScheme,
     PrivateKeyWrapper privateKeyWrapper,
-    const uint8_t * message,size_t size){
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
-    bls::PrivateKey *privateKey = (bls::PrivateKey*) privateKeyWrapper;
-    vector<uint8_t> msg(message,message+size);
-    bls::G2Element sig = (*augSchemeMpl).Sign(*privateKey,msg);
+    const uint8_t *message,
+    size_t size)
+{
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
+    bls::PrivateKey *privateKey = (bls::PrivateKey *)privateKeyWrapper;
+    vector<uint8_t> msg(message, message + size);
+    bls::G2Element sig = (*augSchemeMpl).Sign(*privateKey, msg);
     std::vector<uint8_t> sigBytes = sig.Serialize();
-    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
+    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
 }
 
 BytesWrapper AugSchemeMPLWrapperPrependingSign(
     AugSchemeMPLWrapper augScheme,
     PrivateKeyWrapper privateKeyWrapper,
-    const uint8_t * message,size_t size,
-    BytesWrapper publicKeyWrapper){
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
-    bls::PrivateKey *privateKey = (bls::PrivateKey*) privateKeyWrapper;
-    bls::Bytes *g1Bytes = (bls::Bytes*) publicKeyWrapper;
-    vector<uint8_t> msg(message,message+size);
+    const uint8_t *message,
+    size_t size,
+    BytesWrapper publicKeyWrapper)
+{
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
+    bls::PrivateKey *privateKey = (bls::PrivateKey *)privateKeyWrapper;
+    bls::Bytes *g1Bytes = (bls::Bytes *)publicKeyWrapper;
+    vector<uint8_t> msg(message, message + size);
     bls::G1Element g1 = bls::G1Element::FromBytes(*g1Bytes);
-    bls::G2Element sig = (*augSchemeMpl).Sign(*privateKey,msg,g1);
+    bls::G2Element sig = (*augSchemeMpl).Sign(*privateKey, msg, g1);
     std::vector<uint8_t> sigBytes = sig.Serialize();
-    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
+    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
 }
 
 int AugSchemeMPLWrapperVerify(
     AugSchemeMPLWrapper augScheme,
     BytesWrapper publicKeyBytes,
-    const uint8_t * message,size_t size,
-    BytesWrapper signatureBytes){
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
-    bls::Bytes *pubBytes = (bls::Bytes*)publicKeyBytes;
-    bls::Bytes *sigBytes = (bls::Bytes*)signatureBytes;
+    const uint8_t *message,
+    size_t size,
+    BytesWrapper signatureBytes)
+{
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
+    bls::Bytes *pubBytes = (bls::Bytes *)publicKeyBytes;
+    bls::Bytes *sigBytes = (bls::Bytes *)signatureBytes;
     bls::G2Element signature;
     bls::G1Element publicKey;
-    try{
+    try {
         signature = bls::G2Element::FromBytes(*sigBytes);
         publicKey = bls::G1Element::FromBytes(*pubBytes);
-    }catch(...){
+    } catch (...) {
         return 0;
     }
-    vector<uint8_t> msg(message,message+size);
-    if ((*augSchemeMpl).Verify(publicKey,msg,signature)){
+    vector<uint8_t> msg(message, message + size);
+    if ((*augSchemeMpl).Verify(publicKey, msg, signature)) {
         return 1;
     }
     return 0;
 }
 
-PrivateKeyWrapper AugSchemeMPLDeriveChildSk(AugSchemeMPLWrapper augScheme,PrivateKeyWrapper master,uint32_t index){
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
-    bls::PrivateKey * masterPrivateKey = (bls::PrivateKey*) master;
-    bls::PrivateKey childSk = (*augSchemeMpl).DeriveChildSk(*masterPrivateKey,index);
+PrivateKeyWrapper AugSchemeMPLDeriveChildSk(
+    AugSchemeMPLWrapper augScheme,
+    PrivateKeyWrapper master,
+    uint32_t index)
+{
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
+    bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
+    bls::PrivateKey childSk =
+        (*augSchemeMpl).DeriveChildSk(*masterPrivateKey, index);
     bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
     return (void *)(childPrivateKey);
 }
 
 PrivateKeyWrapper AugSchemeMPLDeriveChildSkUnhardened(
-    AugSchemeMPLWrapper augScheme,PrivateKeyWrapper master,uint32_t index){
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
-    bls::PrivateKey * masterPrivateKey = (bls::PrivateKey*) master;
-    bls::PrivateKey childSk = (*augSchemeMpl).DeriveChildSkUnhardened(*masterPrivateKey,index);
+    AugSchemeMPLWrapper augScheme,
+    PrivateKeyWrapper master,
+    uint32_t index)
+{
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
+    bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
+    bls::PrivateKey childSk =
+        (*augSchemeMpl).DeriveChildSkUnhardened(*masterPrivateKey, index);
     bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
     return (void *)(childPrivateKey);
 }
 
 BytesWrapper AugSchemeMPLDeriveChildPkUnhardened(
-    AugSchemeMPLWrapper augScheme,BytesWrapper master,uint32_t index){
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
-    bls::G1Element * masterPublicKey = (bls::G1Element*) master;
-    bls::G1Element childPk = (*augSchemeMpl).DeriveChildPkUnhardened(*masterPublicKey,index);
+    AugSchemeMPLWrapper augScheme,
+    BytesWrapper master,
+    uint32_t index)
+{
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
+    bls::G1Element *masterPublicKey = (bls::G1Element *)master;
+    bls::G1Element childPk =
+        (*augSchemeMpl).DeriveChildPkUnhardened(*masterPublicKey, index);
     std::vector<uint8_t> pk = childPk.Serialize();
-    return BytesWrapperInit(pk.data(),pk.size());
+    return BytesWrapperInit(pk.data(), pk.size());
 }
 
 BytesWrapper AugSchemeMPLWrapperAggregateG1Element(
     AugSchemeMPLWrapper augScheme,
-    const BytesWrapper * publicKeys,int num){
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
+    const BytesWrapper *publicKeys,
+    int num)
+{
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
     std::vector<bls::G1Element> pubKeys;
-    for (int i = 0 ;i < num ;i++){
-        bls::Bytes *bytes =  (bls::Bytes*)(publicKeys[i]);
+    for (int i = 0; i < num; i++) {
+        bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
         bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
         pubKeys.push_back(g1);
     }
     bls::G1Element g1 = (*augSchemeMpl).Aggregate(pubKeys);
     vector<uint8_t> sigBytes = g1.Serialize();
-    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
+    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
 }
 
 BytesWrapper AugSchemeMPLWrapperAggregateG2Element(
     AugSchemeMPLWrapper augScheme,
-    const BytesWrapper * signatures,int num){
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
+    const BytesWrapper *signatures,
+    int num)
+{
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
     std::vector<bls::G2Element> signs;
-    for (int i = 0 ;i < num ;i++){
-        bls::Bytes *bytes =  (bls::Bytes*)(signatures[i]);
+    for (int i = 0; i < num; i++) {
+        bls::Bytes *bytes = (bls::Bytes *)(signatures[i]);
         bls::G2Element g2 = bls::G2Element::FromBytes(*bytes);
         signs.push_back(g2);
     }
     bls::G2Element g2 = (*augSchemeMpl).Aggregate(signs);
     vector<uint8_t> sigBytes = g2.Serialize();
-    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
+    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
 }
 
 int AugSchemeMPLWrapperAggregateVerify(
     AugSchemeMPLWrapper augScheme,
-    const BytesWrapper * publicKeys,int keyNum,
-    const BytesWrapper * messages,int msgNum,
-    const BytesWrapper signature){
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL*) augScheme;
+    const BytesWrapper *publicKeys,
+    int keyNum,
+    const BytesWrapper *messages,
+    int msgNum,
+    const BytesWrapper signature)
+{
+    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
     std::vector<bls::G1Element> pubKeys;
-    for (int i = 0 ;i < keyNum ;i++){
-        bls::Bytes *bytes =  (bls::Bytes*)(publicKeys[i]);
+    for (int i = 0; i < keyNum; i++) {
+        bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
         bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
         pubKeys.push_back(g1);
     }
-    bls::Bytes *g2 = (bls::Bytes*)signature;
+    bls::Bytes *g2 = (bls::Bytes *)signature;
     bls::G2Element sig = bls::G2Element::FromBytes(*g2);
-    std::vector<bls::Bytes>msgs;
-    for (int i = 0 ;i < msgNum ;i++){
-        bls::Bytes *bytes =  (bls::Bytes*)(messages[i]);
+    std::vector<bls::Bytes> msgs;
+    for (int i = 0; i < msgNum; i++) {
+        bls::Bytes *bytes = (bls::Bytes *)(messages[i]);
         msgs.push_back(*bytes);
     }
-    if (augSchemeMpl->AggregateVerify(pubKeys,msgs,sig)){
+    if (augSchemeMpl->AggregateVerify(pubKeys, msgs, sig)) {
         return 1;
-    }else{
+    } else {
         return 0;
     }
 }
 
-PopSchemeMPLWrapper PopSchemeMPLWrapperInit(){
+PopSchemeMPLWrapper PopSchemeMPLWrapperInit()
+{
     bls::PopSchemeMPL *popSchemeMpl = new bls::PopSchemeMPL();
     return (PopSchemeMPLWrapper)(popSchemeMpl);
 }
 
-
-PrivateKeyWrapper PopSchemeMPLWrapperKeyGen(PopSchemeMPLWrapper popScheme,const uint8_t * seed,size_t size){
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
-    std::vector<uint8_t> keySeed(seed,seed+size);
-    bls::PrivateKey *privateKey = new bls::PrivateKey(popSchemeMpl->KeyGen(keySeed));
+PrivateKeyWrapper PopSchemeMPLWrapperKeyGen(
+    PopSchemeMPLWrapper popScheme,
+    const uint8_t *seed,
+    size_t size)
+{
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
+    std::vector<uint8_t> keySeed(seed, seed + size);
+    bls::PrivateKey *privateKey =
+        new bls::PrivateKey(popSchemeMpl->KeyGen(keySeed));
     return (PrivateKeyWrapper)(privateKey);
 }
 
 BytesWrapper PopSchemeMPLWrapperSign(
     PopSchemeMPLWrapper popScheme,
     PrivateKeyWrapper privateKeyWrapper,
-    const uint8_t * message,size_t size){
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
-    bls::PrivateKey *privateKey = (bls::PrivateKey*) privateKeyWrapper;
-    vector<uint8_t> msg(message,message+size);
-    bls::G2Element sig = (*popSchemeMpl).Sign(*privateKey,msg);
+    const uint8_t *message,
+    size_t size)
+{
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
+    bls::PrivateKey *privateKey = (bls::PrivateKey *)privateKeyWrapper;
+    vector<uint8_t> msg(message, message + size);
+    bls::G2Element sig = (*popSchemeMpl).Sign(*privateKey, msg);
     std::vector<uint8_t> sigBytes = sig.Serialize();
-    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
+    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
 }
 
 int PopSchemeMPLWrapperVerify(
-    PopSchemeMPLWrapper popScheme,BytesWrapper publicKeyBytes,
-    const uint8_t * message,size_t size,BytesWrapper signatureBytes){
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
-    bls::Bytes *pubBytes = (bls::Bytes*)publicKeyBytes;
-    bls::Bytes *sigBytes = (bls::Bytes*)signatureBytes;
+    PopSchemeMPLWrapper popScheme,
+    BytesWrapper publicKeyBytes,
+    const uint8_t *message,
+    size_t size,
+    BytesWrapper signatureBytes)
+{
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
+    bls::Bytes *pubBytes = (bls::Bytes *)publicKeyBytes;
+    bls::Bytes *sigBytes = (bls::Bytes *)signatureBytes;
     bls::G2Element signature;
     bls::G1Element publicKey;
-    try{
+    try {
         signature = bls::G2Element::FromBytes(*sigBytes);
         publicKey = bls::G1Element::FromBytes(*pubBytes);
-    }catch(...){
+    } catch (...) {
         return 0;
     }
-    vector<uint8_t> msg(message,message+size);
-    if ((*popSchemeMpl).Verify(publicKey,msg,signature)){
+    vector<uint8_t> msg(message, message + size);
+    if ((*popSchemeMpl).Verify(publicKey, msg, signature)) {
         return 1;
     }
     return 0;
@@ -334,89 +412,113 @@ int PopSchemeMPLWrapperVerify(
 
 BytesWrapper PopSchemeMPLWrapperAggregateG1Element(
     PopSchemeMPLWrapper popScheme,
-    const BytesWrapper * publicKeys,int num){
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
+    const BytesWrapper *publicKeys,
+    int num)
+{
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
     std::vector<bls::G1Element> pubKeys;
-    for (int i = 0 ;i < num ;i++){
-        bls::Bytes *bytes =  (bls::Bytes*)(publicKeys[i]);
+    for (int i = 0; i < num; i++) {
+        bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
         bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
         pubKeys.push_back(g1);
     }
     bls::G1Element g1 = (*popSchemeMpl).Aggregate(pubKeys);
     vector<uint8_t> sigBytes = g1.Serialize();
-    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
+    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
 }
 
 BytesWrapper PopSchemeMPLWrapperAggregateG2Element(
-    PopSchemeMPLWrapper popScheme,const BytesWrapper * signatures,int num){
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
+    PopSchemeMPLWrapper popScheme,
+    const BytesWrapper *signatures,
+    int num)
+{
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
     std::vector<bls::G2Element> signs;
-    for (int i = 0 ;i < num ;i++){
-        bls::Bytes *bytes =  (bls::Bytes*)(signatures[i]);
+    for (int i = 0; i < num; i++) {
+        bls::Bytes *bytes = (bls::Bytes *)(signatures[i]);
         bls::G2Element g2 = bls::G2Element::FromBytes(*bytes);
         signs.push_back(g2);
     }
     bls::G2Element g2 = (*popSchemeMpl).Aggregate(signs);
     vector<uint8_t> sigBytes = g2.Serialize();
-    return BytesWrapperInit(sigBytes.data(),sigBytes.size());
+    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
 }
 
 int PopSchemeMPLWrapperAggregateVerify(
-    PopSchemeMPLWrapper popScheme,const BytesWrapper * publicKeys,int keyNum,
-    const BytesWrapper * messages,int msgNum, const BytesWrapper signature){
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
+    PopSchemeMPLWrapper popScheme,
+    const BytesWrapper *publicKeys,
+    int keyNum,
+    const BytesWrapper *messages,
+    int msgNum,
+    const BytesWrapper signature)
+{
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
     std::vector<bls::G1Element> pubKeys;
-    for (int i = 0 ;i < keyNum ;i++){
-        bls::Bytes *bytes =  (bls::Bytes*)(publicKeys[i]);
+    for (int i = 0; i < keyNum; i++) {
+        bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
         bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
         pubKeys.push_back(g1);
     }
-    bls::Bytes *g2 = (bls::Bytes*)signature;
+    bls::Bytes *g2 = (bls::Bytes *)signature;
     bls::G2Element sig = bls::G2Element::FromBytes(*g2);
-    std::vector<bls::Bytes>msgs;
-    for (int i = 0 ;i < msgNum ;i++){
-        bls::Bytes *bytes =  (bls::Bytes*)(messages[i]);
+    std::vector<bls::Bytes> msgs;
+    for (int i = 0; i < msgNum; i++) {
+        bls::Bytes *bytes = (bls::Bytes *)(messages[i]);
         msgs.push_back(*bytes);
     }
-    if (popSchemeMpl->AggregateVerify(pubKeys,msgs,sig)){
+    if (popSchemeMpl->AggregateVerify(pubKeys, msgs, sig)) {
         return 1;
-    }else{
+    } else {
         return 0;
     }
 }
 
 PrivateKeyWrapper PopSchemeMPLDeriveChildSk(
-    PopSchemeMPLWrapper popScheme,PrivateKeyWrapper master,uint32_t index){
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
-    bls::PrivateKey * masterPrivateKey = (bls::PrivateKey*) master;
-    bls::PrivateKey childSk = (*popSchemeMpl).DeriveChildSk(*masterPrivateKey,index);
+    PopSchemeMPLWrapper popScheme,
+    PrivateKeyWrapper master,
+    uint32_t index)
+{
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
+    bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
+    bls::PrivateKey childSk =
+        (*popSchemeMpl).DeriveChildSk(*masterPrivateKey, index);
     bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
     return (void *)(childPrivateKey);
 }
 
 PrivateKeyWrapper PopSchemeMPLDeriveChildSkUnhardened(
-    PopSchemeMPLWrapper popScheme,PrivateKeyWrapper master,uint32_t index){
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
-    bls::PrivateKey * masterPrivateKey = (bls::PrivateKey*) master;
-    bls::PrivateKey childSk = (*popSchemeMpl).DeriveChildSkUnhardened(*masterPrivateKey,index);
+    PopSchemeMPLWrapper popScheme,
+    PrivateKeyWrapper master,
+    uint32_t index)
+{
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
+    bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
+    bls::PrivateKey childSk =
+        (*popSchemeMpl).DeriveChildSkUnhardened(*masterPrivateKey, index);
     bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
     return (void *)(childPrivateKey);
 }
 
 BytesWrapper PopSchemeMPLDeriveChildPkUnhardened(
-    PopSchemeMPLWrapper popScheme,BytesWrapper master,uint32_t index){
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
-    bls::G1Element * masterPublicKey = (bls::G1Element*) master;
-    bls::G1Element childPk = (*popSchemeMpl).DeriveChildPkUnhardened(*masterPublicKey,index);
+    PopSchemeMPLWrapper popScheme,
+    BytesWrapper master,
+    uint32_t index)
+{
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
+    bls::G1Element *masterPublicKey = (bls::G1Element *)master;
+    bls::G1Element childPk =
+        (*popSchemeMpl).DeriveChildPkUnhardened(*masterPublicKey, index);
     std::vector<uint8_t> pk = childPk.Serialize();
-    return BytesWrapperInit(pk.data(),pk.size());
+    return BytesWrapperInit(pk.data(), pk.size());
 }
 
-
-BytesWrapper PopSchemeMPLPopProve(PopSchemeMPLWrapper popScheme,PrivateKeyWrapper privateKey){
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL*) popScheme;
-    bls::PrivateKey * key = (bls::PrivateKey*) privateKey;
+BytesWrapper PopSchemeMPLPopProve(
+    PopSchemeMPLWrapper popScheme,
+    PrivateKeyWrapper privateKey)
+{
+    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
+    bls::PrivateKey *key = (bls::PrivateKey *)privateKey;
     bls::G2Element prove = (*popSchemeMpl).PopProve(*key);
     std::vector<uint8_t> pk = prove.Serialize();
-    return BytesWrapperInit(pk.data(),pk.size());
+    return BytesWrapperInit(pk.data(), pk.size());
 }

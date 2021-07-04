@@ -114,13 +114,23 @@ func NewPrivateKeyFromBytes(bytes []byte) (*PrivateKey, error) {
 	return privateKey, nil
 }
 
-func (sk *PrivateKey) GetG2Power() (*G1Element, error) {
-	return nil, nil
+func (sk *PrivateKey) GetG2Power(g2 *G2Element) (*G2Element, error) {
+	ret := C.PrivateKeyWrapperGetG2Power(sk.instance, g2.instance.instance)
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	bs := newBytesBufferFromBytesWrapper((C.BytesWrapper)(ret.handle))
+	return newG2ElementFromBytesBuffer(bs)
 }
 
-func (sk *PrivateKey) IsZero() bool {
-	zero := C.PrivateKeyWrapperIsZero(sk.instance)
-	return zero == 1
+func (sk *PrivateKey) IsZero() (bool, error) {
+	ret := C.PrivateKeyWrapperIsZero(sk.instance)
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return false, fmt.Errorf(C.GoString(ret.err))
+	}
+	return ret.ret == 1, nil
 }
 
 func (sk *PrivateKey) Bytes() []byte {
@@ -129,31 +139,58 @@ func (sk *PrivateKey) Bytes() []byte {
 	return buffer.Bytes()
 }
 
-func (sk *PrivateKey) Equals(other *PrivateKey) bool {
+func (sk *PrivateKey) Equals(other *PrivateKey) (bool, error) {
 	if other == nil {
-		return false
+		return false, nil
 	}
 	if bytes.Equal(sk.Bytes(), other.Bytes()) {
-		return true
+		return true, nil
 	}
-	ok := C.PrivateKeyWrapperEquals(sk.instance, other.instance)
-	if ok > 0 {
-		return true
+	ret := C.PrivateKeyWrapperEquals(sk.instance, other.instance)
+	if ret.err != nil {
+		return false, fmt.Errorf(C.GoString(ret.err))
 	}
-	return false
+	if ret.ret > 0 {
+		return true, nil
+	}
+	return false, nil
+}
+
+func (sk PrivateKey) MulG1Element(g1 *G1Element) (*G1Element, error) {
+	ret := C.PrivateKeyWrapperMulG1Element(sk.instance, g1.instance.instance)
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	bs := newBytesBufferFromBytesWrapper((C.BytesWrapper)(ret.handle))
+	return newG1ElementFromBytesBuffer(bs)
+}
+
+func (sk PrivateKey) MulG2Element(g2 *G2Element) (*G2Element, error) {
+	ret := C.PrivateKeyWrapperMulG2Element(sk.instance, g2.instance.instance)
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	bs := newBytesBufferFromBytesWrapper((C.BytesWrapper)(ret.handle))
+	return newG2ElementFromBytesBuffer(bs)
 }
 
 func (sk *PrivateKey) String() string {
 	return hex.EncodeToString(sk.Bytes())
 }
 
-func (sk *PrivateKey) IsEqual(key *PrivateKey) bool {
+func (sk *PrivateKey) IsEqual(key *PrivateKey) (bool, error) {
 	return sk.Equals(key)
 }
 
 func (sk *PrivateKey) GetG1Element() (*G1Element, error) {
-	g1p := C.PrivateKeyWrapperGetG1Element(sk.instance)
-	data := newBytesBufferFromBytesWrapper(g1p)
+	ret := C.PrivateKeyWrapperGetG1Element(sk.instance)
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	data := newBytesBufferFromBytesWrapper((C.BytesWrapper)(ret.handle))
 	g1, err := newG1ElementFromBytesBuffer(data)
 	if err != nil {
 		return nil, err
@@ -167,9 +204,13 @@ func PrivateKeyAggregate(privateKeys []*PrivateKey) (*PrivateKey, error) {
 	for i, k := range privateKeys {
 		privKeys[i] = (*k).instance
 	}
-	augKey := C.PrivateKeyWrapperAggregate((*C.PrivateKeyWrapper)(unsafe.Pointer(&privKeys[0])), C.int(num))
+	ret := C.PrivateKeyWrapperAggregate((*C.PrivateKeyWrapper)(unsafe.Pointer(&privKeys[0])), C.int(num))
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
 	privateKey := &PrivateKey{
-		instance: augKey,
+		instance: (C.PrivateKeyWrapper)(ret.handle),
 	}
 	return privateKey, nil
 }
@@ -181,13 +222,27 @@ type G1Element struct {
 	status   int8                //
 }
 
+func G1ElementGenerator() (*G1Element, error) {
+	ret := C.G1ElementGenerator()
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	bs := newBytesBufferFromBytesWrapper((C.BytesWrapper)(ret.handle))
+	g1 := &G1Element{
+		instance: bs,
+	}
+	copy(g1.data[:], bs.Bytes())
+	return g1, nil
+}
+
 func NewG1ElementFromBytes(buffer []byte) (*G1Element, error) {
 	if len(buffer) != G1ElementSize {
 		return nil, fmt.Errorf("Invalid G1Element data length ")
 	}
-	bytes := newBytesBufferFromBytes(buffer)
+	bs := newBytesBufferFromBytes(buffer)
 	g1 := &G1Element{
-		instance: bytes,
+		instance: bs,
 	}
 	copy(g1.data[:], buffer)
 	return g1, nil

@@ -12,22 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #ifndef BLS_GO_BINDINGS_BYTES_WRAPPER_H
 #define BLS_GO_BINDINGS_BYTES_WRAPPER_H
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
-typedef void * BytesWrapper;
+typedef void *BytesWrapper;
 BytesWrapper BytesWrapperInit(const uint8_t *buffer, size_t bufferSize);
 void BytesWrapperFree(BytesWrapper bytesWrapper);
 size_t BytesWrapperSize(BytesWrapper bytesWrapper);
-const uint8_t * BytesWrapperBegin(BytesWrapper bytesWrapper);
-const uint8_t * BytesWrapperEnd(BytesWrapper bytesWrapper);
-uint8_t BytesWrapperIndex(BytesWrapper bytesWrapper,int index);
+const uint8_t *BytesWrapperBegin(BytesWrapper bytesWrapper);
+const uint8_t *BytesWrapperEnd(BytesWrapper bytesWrapper);
+uint8_t BytesWrapperIndex(BytesWrapper bytesWrapper, int index);
 #ifdef __cplusplus
 }
 #endif

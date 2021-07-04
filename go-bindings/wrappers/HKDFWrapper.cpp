@@ -13,21 +13,29 @@
 // limitations under the License.
 
 #include "HKDFWrapper.h"
+
 #include "../../src/bls.hpp"
 
-BytesWrapper HKDF256Extract(BytesWrapper salt,BytesWrapper ikm){
+BytesWrapper HKDF256Extract(BytesWrapper salt, BytesWrapper ikm)
+{
     std::vector<uint8_t> out;
-    bls::Bytes *saltBytes = (bls::Bytes*)(salt);
-    bls::Bytes *ikmBytes  = (bls::Bytes*)(ikm);
-    bls::HKDF256::Extract(out.data(),saltBytes->begin(),saltBytes->size(),ikmBytes->begin(),ikmBytes->size());
-    return BytesWrapperInit(out.data(),out.size());
+    bls::Bytes *saltBytes = reinterpret_cast<bls::Bytes *>(salt);
+    bls::Bytes *ikmBytes = reinterpret_cast<bls::Bytes *>(ikm);
+    bls::HKDF256::Extract(
+        out.data(),
+        saltBytes->begin(),
+        saltBytes->size(),
+        ikmBytes->begin(),
+        ikmBytes->size());
+    return BytesWrapperInit(out.data(), out.size());
 }
 
-BytesWrapper HKDF256Expand(BytesWrapper prk,BytesWrapper info){
-//    std::vector<uint8_t> out;
-//    bls::Bytes *saltBytes = (bls::Bytes*)(prk);
-//    bls::Bytes *ikmBytes  = (bls::Bytes*)(info);
-//    bls::HKDF256::Expand(out.data(),saltBytes->begin(),saltBytes->size(),ikmBytes->begin(),ikmBytes->size());
-//    return BytesWrapperInit(out.data(),out.size());
-    return  NULL;
+BytesWrapper HKDF256Expand(BytesWrapper prk, BytesWrapper info)
+{
+    //    std::vector<uint8_t> out;
+    //    bls::Bytes *saltBytes = (bls::Bytes*)(prk);
+    //    bls::Bytes *ikmBytes  = (bls::Bytes*)(info);
+    //    bls::HKDF256::Expand(out.data(),saltBytes->begin(),saltBytes->size(),ikmBytes->begin(),ikmBytes->size());
+    //    return BytesWrapperInit(out.data(),out.size());
+    return NULL;
 }
