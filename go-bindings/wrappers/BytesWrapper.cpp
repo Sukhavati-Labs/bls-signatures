@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "BytesWrapper.h"
-
-#include "../../src/util.hpp"
 #include "relic.h"
+#include "../../src/bls.hpp"
+
 
 BytesWrapper BytesWrapperInit(const uint8_t *buffer, size_t bufferSize)
 {

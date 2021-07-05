@@ -18,6 +18,7 @@
 #include <stdint.h>
 
 #include "BytesWrapper.h"
+#include "GoWrapper.h"
 #include "PrivateKeyWrapper.h"
 #ifdef __cplusplus
 extern "C" {
@@ -126,7 +127,7 @@ int AugSchemeMPLWrapperAggregateVerify(
     int msgNum,
     const BytesWrapper signature);
 
-PrivateKeyWrapper AugSchemeMPLDeriveChildSk(
+HandleRetWrapper AugSchemeMPLDeriveChildSk(
     AugSchemeMPLWrapper augScheme,
     PrivateKeyWrapper master,
     uint32_t index);
