@@ -603,9 +603,13 @@ func (a AugSchemeMPL) AggregateVerify(publicKeys []*G1Element, messages [][]byte
 }
 
 func (a AugSchemeMPL) DeriveChildSk(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
-	sk := C.AugSchemeMPLDeriveChildSk(a.instance, privateKey.instance, C.uint(index))
+	ret := C.AugSchemeMPLDeriveChildSk(a.instance, privateKey.instance, C.uint(index))
+	if ret.err != nil {
+	    defer C.free(unsafe.Pointer(ret.err))
+	    return nil,fmt.Errorf(C.GoString(ret.err));
+	}
 	return &PrivateKey{
-		instance: sk,
+		instance: (C.PrivateKeyWrapper)(ret.handle),
 	}, nil
 }
 
