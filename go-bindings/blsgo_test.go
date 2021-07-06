@@ -396,3 +396,33 @@ func TestBasicSchemeMPL_Sign(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestAugSchemeMPL_KeyGen(t *testing.T) {
+	basic := NewAugSchemeMPL()
+	seed := []byte{
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+		1, 2, 3, 4, 5, 6, 7, 8,
+	}
+	privateKey, err := basic.KeyGen(seed)
+	if err != nil {
+		t.FailNow()
+	}
+	ok, err := privateKey.IsZero()
+	if err != nil {
+		t.FailNow()
+	}
+	if ok {
+		t.Errorf("privateKey is zero ")
+	}
+	t.Log("TestAugSchemeMPL privateKey:", privateKey.String())
+	if privateKey == nil {
+		t.FailNow()
+	}
+	publicKey, err := privateKey.GetG1Element()
+	if err != nil {
+		t.FailNow()
+	}
+	t.Log("publicKey:", publicKey.String())
+}
