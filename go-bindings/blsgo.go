@@ -36,6 +36,8 @@ const (
 	G1ElementSize = 48
 	// G2ElementSize the length of bls signature bytes
 	G2ElementSize = 96
+	// hash 256 size
+	Hash256Size = 32
 )
 
 var (
@@ -815,4 +817,19 @@ func IKMToLamportSk(ikm []byte, salt []byte) []byte {
 
 func ParentSkToLamportPK(parentSk *PrivateKey, index uint32) []byte {
 	return nil
+}
+
+func Hash256(message []byte) ([Hash256Size]byte, error) {
+	size := len(message)
+	var sha [Hash256Size]byte
+	cBuffer := (*C.uint8_t)(C.CBytes(message))
+	ret := C.Hash256(cBuffer, size)
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return sha, fmt.Errorf(ret.err)
+	}
+	wrapper := newBytesBufferFromBytesWrapper(ret.handle)
+
+	copy(sha[:], wrapper.Bytes())
+	return sha, nil
 }

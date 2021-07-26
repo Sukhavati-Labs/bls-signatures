@@ -13,3 +13,18 @@
 // limitations under the License.
 
 #include "UtilWrapper.h"
+#include "BytesWrapper.h"
+#include "../../src/util.hpp"
+
+HandleRetWrapper Hash256(const uint8_t *message, const size_t messageSize){
+    uint8_t hash[32];
+    HandleRetWrapper ret;
+    try {
+        bls::Util::Hash256(hash, message, messageSize);
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
+        return ret;
+    }
+    ret.handle = reinterpret_cast<void *>(BytesWrapperInit(hash,32));
+    return ret;
+}

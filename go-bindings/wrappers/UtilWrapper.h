@@ -14,9 +14,14 @@
 
 #ifndef BLS_GO_BINDINGS_UTIL_WRAPPER_H
 #define BLS_GO_BINDINGS_UTIL_WRAPPER_H
+#include "GoWrapper.h"
+#include <stddef.h>
+#include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+HandleRetWrapper Hash256(const uint8_t *message, const size_t messageSize);
 
 #ifdef __cplusplus
 }
