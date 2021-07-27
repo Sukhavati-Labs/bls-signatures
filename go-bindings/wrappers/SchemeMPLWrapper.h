@@ -73,7 +73,7 @@ HandleRetWrapper BasicSchemeMPLWrapperSign(
     const uint8_t* message,
     size_t size);
 
-int BasicSchemeMPLWrapperVerify(
+IntRetWrapper BasicSchemeMPLWrapperVerify(
     BasicSchemeMPLWrapper basicScheme,
     BytesWrapper publicKeyBytes,
     const uint8_t* message,
