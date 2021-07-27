@@ -375,21 +375,27 @@ HandleRetWrapper AugSchemeMPLDeriveChildPkUnhardened(
     return ret;
 }
 
-BytesWrapper AugSchemeMPLWrapperAggregateG1Element(
+HandleRetWrapper AugSchemeMPLWrapperAggregateG1Element(
     AugSchemeMPLWrapper augScheme,
     const BytesWrapper *publicKeys,
     int num)
 {
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
-    std::vector<bls::G1Element> pubKeys;
-    for (int i = 0; i < num; i++) {
-        bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
-        bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
-        pubKeys.push_back(g1);
+    HandleRetWrapper ret = {0};
+    try {
+        bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
+        std::vector<bls::G1Element> pubKeys;
+        for (int i = 0; i < num; i++) {
+            bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
+            bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
+            pubKeys.push_back(g1);
+        }
+        bls::G1Element g1 = (*augSchemeMpl).Aggregate(pubKeys);
+        vector<uint8_t> sigBytes = g1.Serialize();
+        ret.handle = BytesWrapperInit(sigBytes.data(), sigBytes.size());
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
     }
-    bls::G1Element g1 = (*augSchemeMpl).Aggregate(pubKeys);
-    vector<uint8_t> sigBytes = g1.Serialize();
-    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
+    return ret;
 }
 
 BytesWrapper AugSchemeMPLWrapperAggregateG2Element(
