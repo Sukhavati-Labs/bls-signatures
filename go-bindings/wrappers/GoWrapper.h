@@ -14,7 +14,7 @@
 
 #ifndef BLS_GO_BINDINGS_GO_WRAPPER_H
 #define BLS_GO_BINDINGS_GO_WRAPPER_H
-
+#include <stdint.h>
 typedef struct _HandleRet {
     void* handle;     // return void * pointer handle
     const char* err;  // error message info ,need free
@@ -24,5 +24,10 @@ typedef struct _IntRet {
     int ret;          // return int value
     const char* err;  // error message
 } IntRetWrapper;
+
+typedef struct _Uint32Ret {
+    uint32_t ret;    // return uint32_t value
+    const char* err; // error message
+} Uint32RetWrapper;
 
 #endif  // BLS_GO_BINDINGS_GO_WRAPPER_H

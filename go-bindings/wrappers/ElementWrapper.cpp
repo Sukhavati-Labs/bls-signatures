@@ -33,11 +33,17 @@ HandleRetWrapper G1ElementGenerator()
     return ret;
 }
 
-uint32_t G1ElementGetFingerprint(BytesWrapper publicKeyWrapper)
+Uint32RetWrapper G1ElementGetFingerprint(BytesWrapper publicKeyWrapper)
 {
-    bls::Bytes *b = reinterpret_cast<bls::Bytes *>(publicKeyWrapper);
-    bls::G1Element g1 = bls::G1Element::FromBytes(*b);
-    return g1.GetFingerprint();
+    Uint32RetWrapper ret = {0};
+    try {
+        bls::Bytes *b = reinterpret_cast<bls::Bytes *>(publicKeyWrapper);
+        bls::G1Element g1 = bls::G1Element::FromBytes(*b);
+        ret.ret = g1.GetFingerprint();
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
 
 BytesWrapper G1ElementAdd(

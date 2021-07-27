@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 HandleRetWrapper G1ElementGenerator();
-uint32_t G1ElementGetFingerprint(BytesWrapper publicKeyWrapper);
+Uint32RetWrapper G1ElementGetFingerprint(BytesWrapper publicKeyWrapper);
 BytesWrapper G1ElementAdd(
     BytesWrapper publicKeyWrapper,
     BytesWrapper publicKeyAddendWrapper);
