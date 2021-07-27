@@ -878,7 +878,12 @@ func (p PopSchemeMPL) AggregateSignatures(signatures []*G2Element) (*G2Element, 
 	for i, k := range signatures {
 		signs[i] = k.cWrapper()
 	}
-	augKey := C.PopSchemeMPLWrapperAggregateG2Element(p.instance, (*C.BytesWrapper)(unsafe.Pointer(&signs[0])), C.int(num))
+	ret := C.PopSchemeMPLWrapperAggregateG2Element(p.instance, (*C.BytesWrapper)(unsafe.Pointer(&signs[0])), C.int(num))
+	if ret.err != nil{
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	augKey := (C.BytesWrapper)(ret.handle)
 	data := newBytesBufferFromBytesWrapper(augKey)
 	return newG2ElementFromBytesBuffer(data)
 }
