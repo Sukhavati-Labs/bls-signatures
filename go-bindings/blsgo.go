@@ -683,7 +683,12 @@ func (a AugSchemeMPL) AggregatePublicKeys(publicKeys []*G1Element) (*G1Element, 
 	for i, k := range publicKeys {
 		pubKeys[i] = k.cWrapper()
 	}
-	augKey := C.AugSchemeMPLWrapperAggregateG1Element(a.instance, (*C.BytesWrapper)(unsafe.Pointer(&pubKeys[0])), C.int(num))
+	ret := C.AugSchemeMPLWrapperAggregateG1Element(a.instance, (*C.BytesWrapper)(unsafe.Pointer(&pubKeys[0])), C.int(num))
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	augKey := (C.BytesWrapper)(ret.handle)
 	data := newBytesBufferFromBytesWrapper(augKey)
 	return newG1ElementFromBytesBuffer(data)
 }

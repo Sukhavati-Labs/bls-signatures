@@ -102,7 +102,7 @@ HandleRetWrapper AugSchemeMPLWrapperPrependingSign(
     size_t size,
     BytesWrapper publicKeyWrapper);
 
-BytesWrapper AugSchemeMPLWrapperAggregateG1Element(
+HandleRetWrapper AugSchemeMPLWrapperAggregateG1Element(
     AugSchemeMPLWrapper augScheme,
     const BytesWrapper* publicKeys,
     int num);
