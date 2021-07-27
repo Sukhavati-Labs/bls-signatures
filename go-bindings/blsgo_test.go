@@ -430,19 +430,19 @@ func TestAugSchemeMPL_KeyGen(t *testing.T) {
 
 func TestHash256(t *testing.T) {
 	message := []byte{1, 2, 3, 4}
-	hash256Bytes, err := Hash256(message)
-	if err != nil {
-		t.FailNow()
-		return
-	}
-	h := sha256.New()
-	h.Write(message)
-	sha256Bytes := h.Sum(nil)
-
-	t.Log("hash256:", hash256Bytes)
-	t.Log("sha256", sha256Bytes)
-	if !bytes.Equal(hash256Bytes[:], sha256Bytes) {
-		t.FailNow()
+	for i := 0; i < 100; i++ {
+		hash256Bytes, err := Hash256(message)
+		if err != nil {
+			t.FailNow()
+			return
+		}
+		sha256Bytes := sha256.Sum256(message)
+		t.Log("hash256:", hash256Bytes)
+		t.Log("sha256", sha256Bytes)
+		if !bytes.Equal(hash256Bytes[:], sha256Bytes[:]) {
+			t.FailNow()
+		}
+		message = append(message, byte(i))
 	}
 
 }
