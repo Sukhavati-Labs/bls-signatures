@@ -41,21 +41,27 @@ HandleRetWrapper BasicSchemeMPLWrapperKeyGen(
      return ret;
 }
 
-BytesWrapper BasicSchemeMPLWrapperAggregateG2Element(
+HandleRetWrapper BasicSchemeMPLWrapperAggregateG2Element(
     BasicSchemeMPLWrapper basicScheme,
     const BytesWrapper *signatures,
     int num)
 {
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
-    std::vector<bls::G2Element> sigs;
-    for (int i = 0; i < num; i++) {
-        bls::Bytes *bytes = (bls::Bytes *)(signatures[i]);
-        bls::G2Element g2 = bls::G2Element::FromBytes(*bytes);
-        sigs.push_back(g2);
+    HandleRetWrapper  ret = {0};
+    try{
+        bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
+        std::vector<bls::G2Element> sigs;
+        for (int i = 0; i < num; i++) {
+            bls::Bytes *bytes = (bls::Bytes *)(signatures[i]);
+            bls::G2Element g2 = bls::G2Element::FromBytes(*bytes);
+            sigs.push_back(g2);
+        }
+        bls::G2Element augG2 = (*basicSchemeMpl).Aggregate(sigs);
+        std::vector<uint8_t> g2 = augG2.Serialize();
+        ret.handle = BytesWrapperInit(g2.data(), g2.size());
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
     }
-    bls::G2Element augG2 = (*basicSchemeMpl).Aggregate(sigs);
-    std::vector<uint8_t> g2 = augG2.Serialize();
-    return BytesWrapperInit(g2.data(), g2.size());
+    return ret;
 }
 
 BytesWrapper BasicSchemeMPLWrapperAggregateG1Element(

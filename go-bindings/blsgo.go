@@ -430,7 +430,12 @@ func (bs *BasicSchemeMPL) AggregateSignatures(signatures []*G2Element) (*G2Eleme
 	for i, k := range signatures {
 		sigs[i] = k.cWrapper()
 	}
-	augKey := C.BasicSchemeMPLWrapperAggregateG2Element(bs.instance, (*C.BytesWrapper)(unsafe.Pointer(&sigs[0])), C.int(num))
+	ret := C.BasicSchemeMPLWrapperAggregateG2Element(bs.instance, (*C.BytesWrapper)(unsafe.Pointer(&sigs[0])), C.int(num))
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	augKey := (C.BytesWrapper)(ret.handle)
 	data := newBytesBufferFromBytesWrapper(augKey)
 	return newG2ElementFromBytesBuffer(data)
 }

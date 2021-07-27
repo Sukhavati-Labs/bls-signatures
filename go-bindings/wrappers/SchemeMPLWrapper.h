@@ -39,7 +39,7 @@ BytesWrapper BasicSchemeMPLWrapperAggregateG1Element(
     const BytesWrapper* publicKeys,
     int num);
 
-BytesWrapper BasicSchemeMPLWrapperAggregateG2Element(
+HandleRetWrapper BasicSchemeMPLWrapperAggregateG2Element(
     BasicSchemeMPLWrapper basicScheme,
     const BytesWrapper* signatures,
     int num);
