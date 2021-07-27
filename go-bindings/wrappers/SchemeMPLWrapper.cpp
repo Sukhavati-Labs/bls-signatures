@@ -337,17 +337,23 @@ HandleRetWrapper AugSchemeMPLDeriveChildSk(
     return ret;
 }
 
-PrivateKeyWrapper AugSchemeMPLDeriveChildSkUnhardened(
+HandleRetWrapper AugSchemeMPLDeriveChildSkUnhardened(
     AugSchemeMPLWrapper augScheme,
     PrivateKeyWrapper master,
     uint32_t index)
 {
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
-    bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
-    bls::PrivateKey childSk =
-        (*augSchemeMpl).DeriveChildSkUnhardened(*masterPrivateKey, index);
-    bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
-    return (void *)(childPrivateKey);
+    HandleRetWrapper ret = {0};
+    try {
+        bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
+        bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
+        bls::PrivateKey childSk =
+            (*augSchemeMpl).DeriveChildSkUnhardened(*masterPrivateKey, index);
+        bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
+        ret.handle = (PrivateKeyWrapper)(childPrivateKey);
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
 
 BytesWrapper AugSchemeMPLDeriveChildPkUnhardened(
