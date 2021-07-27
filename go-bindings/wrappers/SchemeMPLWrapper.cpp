@@ -187,17 +187,23 @@ HandleRetWrapper BasicSchemeMPLDeriveChildSk(
     return ret;
 }
 
-PrivateKeyWrapper BasicSchemeMPLDeriveChildSkUnhardened(
+HandleRetWrapper BasicSchemeMPLDeriveChildSkUnhardened(
     BasicSchemeMPLWrapper basicScheme,
     PrivateKeyWrapper master,
     uint32_t index)
 {
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
-    bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
-    bls::PrivateKey childSk =
-        (*basicSchemeMpl).DeriveChildSkUnhardened(*masterPrivateKey, index);
-    bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
-    return (void *)(childPrivateKey);
+    HandleRetWrapper ret = {0};
+    try {
+        bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
+        bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
+        bls::PrivateKey childSk =
+            (*basicSchemeMpl).DeriveChildSkUnhardened(*masterPrivateKey, index);
+        bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
+        ret.handle =  (PrivateKeyWrapper)(childPrivateKey);
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
 
 BytesWrapper BasicSchemeMPLDeriveChildPkUnhardened(

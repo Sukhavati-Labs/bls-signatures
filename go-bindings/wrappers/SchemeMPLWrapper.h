@@ -57,7 +57,7 @@ HandleRetWrapper BasicSchemeMPLDeriveChildSk(
     PrivateKeyWrapper master,
     uint32_t index);
 
-PrivateKeyWrapper BasicSchemeMPLDeriveChildSkUnhardened(
+HandleRetWrapper BasicSchemeMPLDeriveChildSkUnhardened(
     BasicSchemeMPLWrapper basicScheme,
     PrivateKeyWrapper master,
     uint32_t index);
