@@ -865,7 +865,7 @@ func (p PopSchemeMPL) Verify(publicKey *G1Element, message []byte, signature *G2
 	cBuffer, size := bytesToCUint8Bytes(message)
 	defer C.free(unsafe.Pointer(cBuffer))
 	ret := C.PopSchemeMPLWrapperVerify(p.instance, publicKey.cWrapper(), cBuffer, size, signature.cWrapper())
-	if ret.err != nil{
+	if ret.err != nil {
 		defer C.free(unsafe.Pointer(ret.err))
 		return false, fmt.Errorf(C.GoString(ret.err))
 	}
@@ -879,7 +879,7 @@ func (p PopSchemeMPL) AggregateSignatures(signatures []*G2Element) (*G2Element, 
 		signs[i] = k.cWrapper()
 	}
 	ret := C.PopSchemeMPLWrapperAggregateG2Element(p.instance, (*C.BytesWrapper)(unsafe.Pointer(&signs[0])), C.int(num))
-	if ret.err != nil{
+	if ret.err != nil {
 		defer C.free(unsafe.Pointer(ret.err))
 		return nil, fmt.Errorf(C.GoString(ret.err))
 	}
@@ -924,7 +924,7 @@ func (p PopSchemeMPL) AggregateVerify(publicKeys []*G1Element, messages [][]byte
 		(*C.BytesWrapper)(unsafe.Pointer(&pubKeys[0])), C.int(keyNum),
 		(*C.BytesWrapper)(unsafe.Pointer(&messageBytes[0])), C.int(msgNum),
 		signature.cWrapper())
-	if ret.err != nil{
+	if ret.err != nil {
 		defer C.free(unsafe.Pointer(ret.err))
 		return false, fmt.Errorf(C.GoString(ret.err))
 	}
@@ -936,22 +936,28 @@ func (p PopSchemeMPL) AggregateVerify(publicKeys []*G1Element, messages [][]byte
 
 func (p PopSchemeMPL) DeriveChildSk(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
 	ret := C.PopSchemeMPLDeriveChildSk(p.instance, privateKey.instance, C.uint(index))
-	if ret.err != nil{
+	if ret.err != nil {
 		defer C.free(unsafe.Pointer(ret.err))
 		return nil, fmt.Errorf(C.GoString(ret.err))
 	}
 	privateKey, err := newPrivateKeyFromCWrapper((C.PrivateKeyWrapper)(ret.handle))
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 	return privateKey, nil
 }
 
 func (p PopSchemeMPL) DeriveChildSkUnhardened(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
-	sk := C.PopSchemeMPLDeriveChildSkUnhardened(p.instance, privateKey.instance, C.uint32_t(index))
-	return &PrivateKey{
-		instance: sk,
-	}, nil
+	ret := C.PopSchemeMPLDeriveChildSkUnhardened(p.instance, privateKey.instance, C.uint32_t(index))
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	privateKey, err := newPrivateKeyFromCWrapper((C.PrivateKeyWrapper)(ret.handle))
+	if err != nil {
+		return nil, err
+	}
+	return privateKey, nil
 }
 
 func (p PopSchemeMPL) DeriveChildPkUnhardened(publicKey *G1Element, index uint32) (*G1Element, error) {
