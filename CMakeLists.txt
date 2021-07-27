@@ -1,5 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.14.0 FATAL_ERROR)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_STANDARD 99)
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 IF(NOT CMAKE_BUILD_TYPE)
@@ -47,13 +50,17 @@ else()
   set(ARITH "easy" CACHE STRING "")
 endif()
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+  set(WSIZE 32 CACHE INTEGER "")
+else()
+  set(WSIZE 64 CACHE INTEGER "")
+endif()
+
 if(EMSCRIPTEN)
   # emscripten needs arch set to be none since it can't compile assembly
   set(ARCH "" CACHE STRING "")
   # emscripten is a 32 bit compiler
   set(WSIZE 32 CACHE INTEGER "")
-else()
-  set(WSIZE 64 CACHE INTEGER "")
 endif()
 
 set(TIMER "CYCLE" CACHE STRING "")
@@ -79,7 +86,11 @@ ENDIF()
 set(STBIN "OFF" CACHE STRING "")
 
 set(FP_METHD "INTEG;INTEG;INTEG;MONTY;LOWER;SLIDE" CACHE STRING "")
-set(CFLAGS "-O3 -funroll-loops -fomit-frame-pointer" CACHE STRING "")
+
+if(NOT MSVC)
+  set(CFLAGS "-O3 -funroll-loops -fomit-frame-pointer" CACHE STRING "")
+endif()
+
 set(FP_PMERS "off" CACHE STRING "")
 set(FPX_METHD "INTEG;INTEG;LAZYR" CACHE STRING "")
 set(EP_PLAIN "off" CACHE STRING "")
