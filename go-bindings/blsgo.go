@@ -889,7 +889,12 @@ func (p PopSchemeMPL) AggregatePublicKeys(publicKeys []*G1Element) (*G1Element, 
 	for i, k := range publicKeys {
 		pubKeys[i] = k.cWrapper()
 	}
-	augKey := C.PopSchemeMPLWrapperAggregateG1Element(p.instance, (*C.BytesWrapper)(unsafe.Pointer(&pubKeys[0])), C.int(num))
+	ret := C.PopSchemeMPLWrapperAggregateG1Element(p.instance, (*C.BytesWrapper)(unsafe.Pointer(&pubKeys[0])), C.int(num))
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	augKey := (C.BytesWrapper)(ret.handle)
 	data := newBytesBufferFromBytesWrapper(augKey)
 	return newG1ElementFromBytesBuffer(data)
 }

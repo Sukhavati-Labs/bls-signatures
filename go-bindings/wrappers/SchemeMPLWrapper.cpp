@@ -524,21 +524,27 @@ IntRetWrapper PopSchemeMPLWrapperVerify(
     return ret;
 }
 
-BytesWrapper PopSchemeMPLWrapperAggregateG1Element(
+HandleRetWrapper PopSchemeMPLWrapperAggregateG1Element(
     PopSchemeMPLWrapper popScheme,
     const BytesWrapper *publicKeys,
     int num)
 {
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
-    std::vector<bls::G1Element> pubKeys;
-    for (int i = 0; i < num; i++) {
-        bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
-        bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
-        pubKeys.push_back(g1);
+    HandleRetWrapper ret = {0};
+    try {
+        bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
+        std::vector<bls::G1Element> pubKeys;
+        for (int i = 0; i < num; i++) {
+            bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
+            bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
+            pubKeys.push_back(g1);
+        }
+        bls::G1Element g1 = (*popSchemeMpl).Aggregate(pubKeys);
+        vector<uint8_t> sigBytes = g1.Serialize();
+        ret.handle = BytesWrapperInit(sigBytes.data(), sigBytes.size());
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
     }
-    bls::G1Element g1 = (*popSchemeMpl).Aggregate(pubKeys);
-    vector<uint8_t> sigBytes = g1.Serialize();
-    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
+    return ret;
 }
 
 BytesWrapper PopSchemeMPLWrapperAggregateG2Element(
