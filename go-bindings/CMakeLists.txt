@@ -16,7 +16,9 @@ add_library(blsgo STATIC
         wrappers/ElementWrapper.cpp
         wrappers/ElementWrapper.h
         wrappers/GoWrapper.cpp
-        wrappers/GoWrapper.h wrappers/HKDFWrapper.cpp wrappers/HKDFWrapper.h)
+        wrappers/GoWrapper.h
+        wrappers/HKDFWrapper.cpp
+        wrappers/HKDFWrapper.h)
 
 include_directories(
         ${INCLUDE_DIRECTORIES}
@@ -34,7 +36,7 @@ endif(GMP_FOUND)
 if (SODIUM_FOUND)
     set(BLSALLOC_SODIUM "1" CACHE STRING "")
     set(SODIUM_STATIC "1" CACHE STRING "")
-    target_link_libraries(blsgo blstmp relic_s sodium)
+    target_link_libraries(blsgo PRIVATE blstmp relic_s sodium)
 else()
-    target_link_libraries(blsgo blstmp relic_s)
+    target_link_libraries(blsgo PRIVATE blstmp relic_s )
 endif()
