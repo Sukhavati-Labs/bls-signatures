@@ -95,7 +95,7 @@ HandleRetWrapper AugSchemeMPLWrapperSign(
     const uint8_t* message,
     size_t size);
 
-BytesWrapper AugSchemeMPLWrapperPrependingSign(
+HandleRetWrapper AugSchemeMPLWrapperPrependingSign(
     AugSchemeMPLWrapper augScheme,
     PrivateKeyWrapper privateKeyWrapper,
     const uint8_t* message,

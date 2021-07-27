@@ -645,7 +645,12 @@ func (a AugSchemeMPL) Sign(privateKey *PrivateKey, message []byte) (signature *G
 func (a AugSchemeMPL) PrependingSign(privateKey *PrivateKey, message []byte, publicKey *G1Element) (signature *G2Element, err error) {
 	cBuffer, size := bytesToCUint8Bytes(message)
 	defer C.free(unsafe.Pointer(cBuffer))
-	sig := C.AugSchemeMPLWrapperPrependingSign(a.instance, privateKey.instance, cBuffer, size, publicKey.cWrapper())
+	ret := C.AugSchemeMPLWrapperPrependingSign(a.instance, privateKey.instance, cBuffer, size, publicKey.cWrapper())
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	sig := (C.BytesWrapper)(ret.handle)
 	data := newBytesBufferFromBytesWrapper(sig)
 	return newG2ElementFromBytesBuffer(data)
 }

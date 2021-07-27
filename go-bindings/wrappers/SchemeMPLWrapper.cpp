@@ -269,21 +269,27 @@ HandleRetWrapper AugSchemeMPLWrapperSign(
     return ret;
 }
 
-BytesWrapper AugSchemeMPLWrapperPrependingSign(
+HandleRetWrapper AugSchemeMPLWrapperPrependingSign(
     AugSchemeMPLWrapper augScheme,
     PrivateKeyWrapper privateKeyWrapper,
     const uint8_t *message,
     size_t size,
     BytesWrapper publicKeyWrapper)
 {
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
-    bls::PrivateKey *privateKey = (bls::PrivateKey *)privateKeyWrapper;
-    bls::Bytes *g1Bytes = (bls::Bytes *)publicKeyWrapper;
-    vector<uint8_t> msg(message, message + size);
-    bls::G1Element g1 = bls::G1Element::FromBytes(*g1Bytes);
-    bls::G2Element sig = (*augSchemeMpl).Sign(*privateKey, msg, g1);
-    std::vector<uint8_t> sigBytes = sig.Serialize();
-    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
+    HandleRetWrapper ret = {0};
+    try {
+        bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
+        bls::PrivateKey *privateKey = (bls::PrivateKey *)privateKeyWrapper;
+        bls::Bytes *g1Bytes = (bls::Bytes *)publicKeyWrapper;
+        vector<uint8_t> msg(message, message + size);
+        bls::G1Element g1 = bls::G1Element::FromBytes(*g1Bytes);
+        bls::G2Element sig = (*augSchemeMpl).Sign(*privateKey, msg, g1);
+        std::vector<uint8_t> sigBytes = sig.Serialize();
+        ret.handle = BytesWrapperInit(sigBytes.data(), sigBytes.size());
+    } catch (std::exception &e) {
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
 
 int AugSchemeMPLWrapperVerify(
