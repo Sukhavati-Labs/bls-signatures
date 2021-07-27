@@ -778,10 +778,15 @@ func NewPopSchemeMPL() *PopSchemeMPL {
 func (p PopSchemeMPL) KeyGen(seed []byte) (*PrivateKey, error) {
 	cBuffer, size := bytesToCUint8Bytes(seed)
 	defer C.free(unsafe.Pointer(cBuffer))
-	if size < 32 {
-		return nil, fmt.Errorf("seed size must >= 32")
+	if size < SeedMinSize {
+		return nil, ErrInvalidSeedLength
 	}
-	var privateKeyWrapper C.PrivateKeyWrapper = C.PopSchemeMPLWrapperKeyGen(p.instance, cBuffer, C.size_t(size))
+	ret := C.PopSchemeMPLWrapperKeyGen(p.instance, cBuffer, C.size_t(size))
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	privateKeyWrapper := (C.PrivateKeyWrapper)(ret.handle)
 	privateKey := &PrivateKey{
 		instance: privateKeyWrapper,
 	}

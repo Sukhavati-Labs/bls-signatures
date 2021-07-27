@@ -462,16 +462,22 @@ PopSchemeMPLWrapper PopSchemeMPLWrapperInit()
     return (PopSchemeMPLWrapper)(popSchemeMpl);
 }
 
-PrivateKeyWrapper PopSchemeMPLWrapperKeyGen(
+HandleRetWrapper PopSchemeMPLWrapperKeyGen(
     PopSchemeMPLWrapper popScheme,
     const uint8_t *seed,
     size_t size)
 {
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
-    std::vector<uint8_t> keySeed(seed, seed + size);
-    bls::PrivateKey *privateKey =
-        new bls::PrivateKey(popSchemeMpl->KeyGen(keySeed));
-    return (PrivateKeyWrapper)(privateKey);
+    HandleRetWrapper ret = {0};
+    try {
+        bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
+        std::vector<uint8_t> keySeed(seed, seed + size);
+        bls::PrivateKey *privateKey =
+            new bls::PrivateKey(popSchemeMpl->KeyGen(keySeed));
+        ret.handle = (PrivateKeyWrapper)(privateKey);
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
 
 BytesWrapper PopSchemeMPLWrapperSign(
