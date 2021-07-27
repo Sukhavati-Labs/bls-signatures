@@ -192,7 +192,7 @@ HandleRetWrapper PopSchemeMPLDeriveChildSkUnhardened(
     PrivateKeyWrapper master,
     uint32_t index);
 
-BytesWrapper PopSchemeMPLDeriveChildPkUnhardened(
+HandleRetWrapper PopSchemeMPLDeriveChildPkUnhardened(
     PopSchemeMPLWrapper popScheme,
     BytesWrapper master,
     uint32_t index);
