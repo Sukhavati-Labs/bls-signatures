@@ -398,21 +398,27 @@ HandleRetWrapper AugSchemeMPLWrapperAggregateG1Element(
     return ret;
 }
 
-BytesWrapper AugSchemeMPLWrapperAggregateG2Element(
+HandleRetWrapper AugSchemeMPLWrapperAggregateG2Element(
     AugSchemeMPLWrapper augScheme,
     const BytesWrapper *signatures,
     int num)
 {
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
-    std::vector<bls::G2Element> signs;
-    for (int i = 0; i < num; i++) {
-        bls::Bytes *bytes = (bls::Bytes *)(signatures[i]);
-        bls::G2Element g2 = bls::G2Element::FromBytes(*bytes);
-        signs.push_back(g2);
+    HandleRetWrapper ret = {0};
+    try {
+        bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
+        std::vector<bls::G2Element> signs;
+        for (int i = 0; i < num; i++) {
+            bls::Bytes *bytes = (bls::Bytes *)(signatures[i]);
+            bls::G2Element g2 = bls::G2Element::FromBytes(*bytes);
+            signs.push_back(g2);
+        }
+        bls::G2Element g2 = (*augSchemeMpl).Aggregate(signs);
+        vector<uint8_t> sigBytes = g2.Serialize();
+        ret.handle= BytesWrapperInit(sigBytes.data(), sigBytes.size());
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
     }
-    bls::G2Element g2 = (*augSchemeMpl).Aggregate(signs);
-    vector<uint8_t> sigBytes = g2.Serialize();
-    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
+    return ret;
 }
 
 IntRetWrapper AugSchemeMPLWrapperAggregateVerify(
