@@ -119,7 +119,7 @@ IntRetWrapper AugSchemeMPLWrapperVerify(
     size_t size,
     BytesWrapper signatureBytes);
 
-int AugSchemeMPLWrapperAggregateVerify(
+IntRetWrapper AugSchemeMPLWrapperAggregateVerify(
     AugSchemeMPLWrapper augScheme,
     const BytesWrapper* publicKeys,
     int keyNum,

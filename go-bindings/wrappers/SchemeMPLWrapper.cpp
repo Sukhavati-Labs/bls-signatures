@@ -397,7 +397,7 @@ BytesWrapper AugSchemeMPLWrapperAggregateG2Element(
     return BytesWrapperInit(sigBytes.data(), sigBytes.size());
 }
 
-int AugSchemeMPLWrapperAggregateVerify(
+IntRetWrapper AugSchemeMPLWrapperAggregateVerify(
     AugSchemeMPLWrapper augScheme,
     const BytesWrapper *publicKeys,
     int keyNum,
@@ -405,25 +405,31 @@ int AugSchemeMPLWrapperAggregateVerify(
     int msgNum,
     const BytesWrapper signature)
 {
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
-    std::vector<bls::G1Element> pubKeys;
-    for (int i = 0; i < keyNum; i++) {
-        bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
-        bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
-        pubKeys.push_back(g1);
+    IntRetWrapper ret = {0};
+    try {
+        bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
+        std::vector<bls::G1Element> pubKeys;
+        for (int i = 0; i < keyNum; i++) {
+            bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
+            bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
+            pubKeys.push_back(g1);
+        }
+        bls::Bytes *g2 = (bls::Bytes *)signature;
+        bls::G2Element sig = bls::G2Element::FromBytes(*g2);
+        std::vector<bls::Bytes> msgs;
+        for (int i = 0; i < msgNum; i++) {
+            bls::Bytes *bytes = (bls::Bytes *)(messages[i]);
+            msgs.push_back(*bytes);
+        }
+        if (augSchemeMpl->AggregateVerify(pubKeys, msgs, sig)) {
+            ret.ret = 1;
+        } else {
+            ret.ret = 0;
+        }
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
     }
-    bls::Bytes *g2 = (bls::Bytes *)signature;
-    bls::G2Element sig = bls::G2Element::FromBytes(*g2);
-    std::vector<bls::Bytes> msgs;
-    for (int i = 0; i < msgNum; i++) {
-        bls::Bytes *bytes = (bls::Bytes *)(messages[i]);
-        msgs.push_back(*bytes);
-    }
-    if (augSchemeMpl->AggregateVerify(pubKeys, msgs, sig)) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return ret;
 }
 
 PopSchemeMPLWrapper PopSchemeMPLWrapperInit()
