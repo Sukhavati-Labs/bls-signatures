@@ -157,7 +157,7 @@ HandleRetWrapper PopSchemeMPLWrapperSign(
     const uint8_t* message,
     size_t size);
 
-int PopSchemeMPLWrapperVerify(
+IntRetWrapper PopSchemeMPLWrapperVerify(
     PopSchemeMPLWrapper popScheme,
     BytesWrapper publicKeyBytes,
     const uint8_t* message,
