@@ -487,7 +487,12 @@ func (bs *BasicSchemeMPL) AggregateVerify(publicKeys []*G1Element, messages [][]
 }
 
 func (bs *BasicSchemeMPL) DeriveChildSk(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
-	sk := C.BasicSchemeMPLDeriveChildSk(bs.instance, privateKey.instance, C.uint32_t(index))
+	ret := C.BasicSchemeMPLDeriveChildSk(bs.instance, privateKey.instance, C.uint32_t(index))
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	sk := (C.PrivateKeyWrapper)(ret.handle)
 	return &PrivateKey{
 		instance: sk,
 	}, nil

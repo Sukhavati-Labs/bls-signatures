@@ -160,7 +160,7 @@ IntRetWrapper BasicSchemeMPLWrapperVerify(
         if ((*basicSchemeMpl).Verify(publicKey, msg, signature)) {
             ret.ret = 1;
         }else{
-            ret.ret =0;
+            ret.ret = 0;
         }
     } catch (std::exception &e) {
         ret.err = strdup(e.what());
@@ -168,17 +168,23 @@ IntRetWrapper BasicSchemeMPLWrapperVerify(
     return ret;
 }
 
-PrivateKeyWrapper BasicSchemeMPLDeriveChildSk(
+HandleRetWrapper BasicSchemeMPLDeriveChildSk(
     BasicSchemeMPLWrapper basicScheme,
     PrivateKeyWrapper master,
     uint32_t index)
 {
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
-    bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
-    bls::PrivateKey childSk =
-        (*basicSchemeMpl).DeriveChildSk(*masterPrivateKey, index);
-    bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
-    return (void *)(childPrivateKey);
+    HandleRetWrapper ret = {0};
+    try {
+        bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
+        bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
+        bls::PrivateKey childSk =
+            (*basicSchemeMpl).DeriveChildSk(*masterPrivateKey, index);
+        bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
+        ret.handle = (PrivateKeyWrapper)(childPrivateKey);
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
 
 PrivateKeyWrapper BasicSchemeMPLDeriveChildSkUnhardened(
