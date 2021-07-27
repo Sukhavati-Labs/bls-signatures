@@ -107,7 +107,7 @@ HandleRetWrapper AugSchemeMPLWrapperAggregateG1Element(
     const BytesWrapper* publicKeys,
     int num);
 
-BytesWrapper AugSchemeMPLWrapperAggregateG2Element(
+HandleRetWrapper AugSchemeMPLWrapperAggregateG2Element(
     AugSchemeMPLWrapper augScheme,
     const BytesWrapper* signatures,
     int num);
