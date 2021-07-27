@@ -295,8 +295,12 @@ func (g1 *G1Element) cWrapper() C.BytesWrapper {
 }
 
 func (g1 G1Element) GetFingerprint() (uint32, error) {
-	fingerpint := C.G1ElementGetFingerprint(g1.cWrapper())
-	return uint32(fingerpint), nil
+	ret := C.G1ElementGetFingerprint(g1.cWrapper())
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return 0, fmt.Errorf(C.GoString(ret.err))
+	}
+	return uint32(ret.ret), nil
 }
 
 func (g1 *G1Element) String() string {
