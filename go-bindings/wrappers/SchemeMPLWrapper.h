@@ -137,7 +137,7 @@ HandleRetWrapper AugSchemeMPLDeriveChildSkUnhardened(
     PrivateKeyWrapper master,
     uint32_t index);
 
-BytesWrapper AugSchemeMPLDeriveChildPkUnhardened(
+HandleRetWrapper AugSchemeMPLDeriveChildPkUnhardened(
     AugSchemeMPLWrapper augScheme,
     BytesWrapper master,
     uint32_t index);

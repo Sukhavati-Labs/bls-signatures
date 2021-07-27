@@ -742,8 +742,12 @@ func (a AugSchemeMPL) DeriveChildSkUnhardened(privateKey *PrivateKey, index uint
 }
 
 func (a AugSchemeMPL) DeriveChildPkUnhardened(publicKey *G1Element, index uint32) (*G1Element, error) {
-	b := C.AugSchemeMPLDeriveChildPkUnhardened(a.instance, publicKey.cWrapper(), C.uint32_t(index))
-	wrapper := newBytesBufferFromBytesWrapper(b)
+	ret := C.AugSchemeMPLDeriveChildPkUnhardened(a.instance, publicKey.cWrapper(), C.uint32_t(index))
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	wrapper := newBytesBufferFromBytesWrapper((C.BytesWrapper)(ret.handle))
 	return newG1ElementFromBytesBuffer(wrapper)
 }
 
