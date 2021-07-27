@@ -112,7 +112,7 @@ BytesWrapper AugSchemeMPLWrapperAggregateG2Element(
     const BytesWrapper* signatures,
     int num);
 
-int AugSchemeMPLWrapperVerify(
+IntRetWrapper AugSchemeMPLWrapperVerify(
     AugSchemeMPLWrapper augScheme,
     BytesWrapper publicKeyBytes,
     const uint8_t* message,
