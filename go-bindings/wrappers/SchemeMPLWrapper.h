@@ -146,7 +146,7 @@ typedef void* PopSchemeMPLWrapper;
 
 PopSchemeMPLWrapper PopSchemeMPLWrapperInit();
 
-PrivateKeyWrapper PopSchemeMPLWrapperKeyGen(
+HandleRetWrapper PopSchemeMPLWrapperKeyGen(
     PopSchemeMPLWrapper popScheme,
     const uint8_t* seed,
     size_t size);
