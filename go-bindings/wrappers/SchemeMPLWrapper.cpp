@@ -662,13 +662,19 @@ HandleRetWrapper PopSchemeMPLDeriveChildPkUnhardened(
     return ret;
 }
 
-BytesWrapper PopSchemeMPLPopProve(
+HandleRetWrapper PopSchemeMPLPopProve(
     PopSchemeMPLWrapper popScheme,
     PrivateKeyWrapper privateKey)
 {
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
-    bls::PrivateKey *key = (bls::PrivateKey *)privateKey;
-    bls::G2Element prove = (*popSchemeMpl).PopProve(*key);
-    std::vector<uint8_t> pk = prove.Serialize();
-    return BytesWrapperInit(pk.data(), pk.size());
+    HandleRetWrapper ret = {0};
+    try {
+        bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
+        bls::PrivateKey *key = (bls::PrivateKey *)privateKey;
+        bls::G2Element prove = (*popSchemeMpl).PopProve(*key);
+        std::vector<uint8_t> pk = prove.Serialize();
+        ret.handle = BytesWrapperInit(pk.data(), pk.size());
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
