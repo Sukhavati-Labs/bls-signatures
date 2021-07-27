@@ -27,7 +27,7 @@ typedef void* BasicSchemeMPLWrapper;
 
 BasicSchemeMPLWrapper BasicSchemeMPLWrapperInit();
 
-PrivateKeyWrapper BasicSchemeMPLWrapperKeyGen(
+HandleRetWrapper BasicSchemeMPLWrapperKeyGen(
     BasicSchemeMPLWrapper basicScheme,
     const uint8_t* seed,
     size_t size);

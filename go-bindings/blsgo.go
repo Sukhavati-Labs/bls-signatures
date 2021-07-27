@@ -36,8 +36,10 @@ const (
 	G1ElementSize = 48
 	// G2ElementSize the length of bls signature bytes
 	G2ElementSize = 96
-	// hash 256 size
+	// Hash256Size hash 256 size
 	Hash256Size = 32
+	// SeedMinSize the minimum length of seed
+	SeedMinSize = 32
 )
 
 var (
@@ -45,6 +47,7 @@ var (
 	ErrInvalidG1ElementLength  = errors.New("Invalid G1Element data length ")
 	ErrInvalidBufferLength     = errors.New("Invalid buffer data length ")
 	ErrInvalidG2ElementLength  = errors.New("Invalid G2Element data length ")
+	ErrInvalidSeedLength       = errors.New("Invalid Seed length ")
 )
 
 // utils
@@ -517,10 +520,16 @@ func (bs *BasicSchemeMPL) Verify(publicKey *G1Element, message []byte, signature
 func (bs *BasicSchemeMPL) KeyGen(seed []byte) (*PrivateKey, error) {
 	cBuffer, size := bytesToCUint8Bytes(seed)
 	defer C.free(unsafe.Pointer(cBuffer))
-	if size < 32 {
-		return nil, fmt.Errorf("seed size must >= 32")
+	if size < SeedMinSize {
+		return nil, ErrInvalidSeedLength
 	}
-	var privateKeyWrapper C.PrivateKeyWrapper = C.BasicSchemeMPLWrapperKeyGen(bs.instance, cBuffer, C.size_t(size))
+
+	ret := C.BasicSchemeMPLWrapperKeyGen(bs.instance, cBuffer, C.size_t(size))
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	var privateKeyWrapper = (C.PrivateKeyWrapper)(ret.handle)
 	privateKey := &PrivateKey{
 		instance: privateKeyWrapper,
 	}

@@ -23,16 +23,22 @@ BasicSchemeMPLWrapper BasicSchemeMPLWrapperInit()
     return (BasicSchemeMPLWrapper)(basicSchemeMpl);
 }
 
-PrivateKeyWrapper BasicSchemeMPLWrapperKeyGen(
+HandleRetWrapper BasicSchemeMPLWrapperKeyGen(
     BasicSchemeMPLWrapper basicScheme,
     const uint8_t *seedBuffer,
     size_t size)
 {
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
-    vector<uint8_t> seed(seedBuffer, seedBuffer + size);
-    bls::PrivateKey *privateKey =
-        new bls::PrivateKey((*basicSchemeMpl).KeyGen(seed));
-    return (PrivateKeyWrapper)(privateKey);
+    HandleRetWrapper ret = {0};
+    try {
+        bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
+        vector<uint8_t> seed(seedBuffer, seedBuffer + size);
+        bls::PrivateKey *privateKey =
+            new bls::PrivateKey((*basicSchemeMpl).KeyGen(seed));
+        ret.handle =  (PrivateKeyWrapper)(privateKey);
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
+    }
+     return ret;
 }
 
 BytesWrapper BasicSchemeMPLWrapperAggregateG2Element(
