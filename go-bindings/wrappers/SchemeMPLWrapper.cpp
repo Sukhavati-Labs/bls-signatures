@@ -480,18 +480,24 @@ HandleRetWrapper PopSchemeMPLWrapperKeyGen(
     return ret;
 }
 
-BytesWrapper PopSchemeMPLWrapperSign(
+HandleRetWrapper PopSchemeMPLWrapperSign(
     PopSchemeMPLWrapper popScheme,
     PrivateKeyWrapper privateKeyWrapper,
     const uint8_t *message,
     size_t size)
 {
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
-    bls::PrivateKey *privateKey = (bls::PrivateKey *)privateKeyWrapper;
-    vector<uint8_t> msg(message, message + size);
-    bls::G2Element sig = (*popSchemeMpl).Sign(*privateKey, msg);
-    std::vector<uint8_t> sigBytes = sig.Serialize();
-    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
+    HandleRetWrapper ret = {0};
+    try {
+        bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
+        bls::PrivateKey *privateKey = (bls::PrivateKey *)privateKeyWrapper;
+        vector<uint8_t> msg(message, message + size);
+        bls::G2Element sig = (*popSchemeMpl).Sign(*privateKey, msg);
+        std::vector<uint8_t> sigBytes = sig.Serialize();
+        ret.handle = BytesWrapperInit(sigBytes.data(), sigBytes.size());
+    } catch (std::exception &e) {
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
 
 int PopSchemeMPLWrapperVerify(
