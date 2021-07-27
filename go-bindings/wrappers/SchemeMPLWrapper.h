@@ -151,7 +151,7 @@ HandleRetWrapper PopSchemeMPLWrapperKeyGen(
     const uint8_t* seed,
     size_t size);
 
-BytesWrapper PopSchemeMPLWrapperSign(
+HandleRetWrapper PopSchemeMPLWrapperSign(
     PopSchemeMPLWrapper popScheme,
     PrivateKeyWrapper privateKeyWrapper,
     const uint8_t* message,
