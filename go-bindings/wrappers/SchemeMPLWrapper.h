@@ -44,7 +44,7 @@ HandleRetWrapper BasicSchemeMPLWrapperAggregateG2Element(
     const BytesWrapper* signatures,
     int num);
 
-int BasicSchemeMPLWrapperAggregateVerify(
+IntRetWrapper BasicSchemeMPLWrapperAggregateVerify(
     BasicSchemeMPLWrapper basicScheme,
     const BytesWrapper* publicKeys,
     int keyNum,
