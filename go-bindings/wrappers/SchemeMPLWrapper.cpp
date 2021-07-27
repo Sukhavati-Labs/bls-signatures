@@ -500,29 +500,28 @@ HandleRetWrapper PopSchemeMPLWrapperSign(
     return ret;
 }
 
-int PopSchemeMPLWrapperVerify(
+IntRetWrapper PopSchemeMPLWrapperVerify(
     PopSchemeMPLWrapper popScheme,
     BytesWrapper publicKeyBytes,
     const uint8_t *message,
     size_t size,
     BytesWrapper signatureBytes)
 {
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
-    bls::Bytes *pubBytes = (bls::Bytes *)publicKeyBytes;
-    bls::Bytes *sigBytes = (bls::Bytes *)signatureBytes;
-    bls::G2Element signature;
-    bls::G1Element publicKey;
+    IntRetWrapper ret = {0};
     try {
-        signature = bls::G2Element::FromBytes(*sigBytes);
-        publicKey = bls::G1Element::FromBytes(*pubBytes);
-    } catch (...) {
-        return 0;
+        bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
+        bls::Bytes *pubBytes = (bls::Bytes *)publicKeyBytes;
+        bls::Bytes *sigBytes = (bls::Bytes *)signatureBytes;
+        bls::G2Element signature = bls::G2Element::FromBytes(*sigBytes);
+        bls::G1Element publicKey = bls::G1Element::FromBytes(*pubBytes);
+        vector<uint8_t> msg(message, message + size);
+        if ((*popSchemeMpl).Verify(publicKey, msg, signature)) {
+            ret.ret = 1;
+        }
+    } catch (std::exception &e) {
+        ret.err = strdup(e.what());
     }
-    vector<uint8_t> msg(message, message + size);
-    if ((*popSchemeMpl).Verify(publicKey, msg, signature)) {
-        return 1;
-    }
-    return 0;
+    return ret;
 }
 
 BytesWrapper PopSchemeMPLWrapperAggregateG1Element(
