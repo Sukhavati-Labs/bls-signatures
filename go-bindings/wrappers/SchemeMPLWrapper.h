@@ -174,7 +174,7 @@ HandleRetWrapper PopSchemeMPLWrapperAggregateG2Element(
     const BytesWrapper* signatures,
     int num);
 
-int PopSchemeMPLWrapperAggregateVerify(
+IntRetWrapper PopSchemeMPLWrapperAggregateVerify(
     PopSchemeMPLWrapper popScheme,
     const BytesWrapper* publicKeys,
     int keyNum,

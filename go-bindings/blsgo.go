@@ -920,11 +920,15 @@ func (p PopSchemeMPL) AggregateVerify(publicKeys []*G1Element, messages [][]byte
 		pubKeys = append(pubKeys, key.cWrapper())
 	}
 
-	ok := C.PopSchemeMPLWrapperAggregateVerify(p.instance,
+	ret := C.PopSchemeMPLWrapperAggregateVerify(p.instance,
 		(*C.BytesWrapper)(unsafe.Pointer(&pubKeys[0])), C.int(keyNum),
 		(*C.BytesWrapper)(unsafe.Pointer(&messageBytes[0])), C.int(msgNum),
 		signature.cWrapper())
-	if ok > 0 {
+	if ret.err != nil{
+		defer C.free(unsafe.Pointer(ret.err))
+		return false, fmt.Errorf(C.GoString(ret.err))
+	}
+	if ret.ret > 0 {
 		return true, nil
 	}
 	return false, nil
