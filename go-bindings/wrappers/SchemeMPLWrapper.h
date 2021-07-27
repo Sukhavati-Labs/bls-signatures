@@ -67,7 +67,7 @@ BytesWrapper BasicSchemeMPLDeriveChildPkUnhardened(
     BytesWrapper master,
     uint32_t index);
 
-BytesWrapper BasicSchemeMPLWrapperSign(
+HandleRetWrapper BasicSchemeMPLWrapperSign(
     BasicSchemeMPLWrapper basicScheme,
     PrivateKeyWrapper privateKeyWrapper,
     const uint8_t* message,
