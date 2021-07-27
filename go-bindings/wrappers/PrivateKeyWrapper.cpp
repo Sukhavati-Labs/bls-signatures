@@ -155,12 +155,18 @@ HandleRetWrapper PrivateKeyWrapperMulG2Element(
     return ret;
 }
 
-BytesWrapper PrivateKeyWrapperSerialize(PrivateKeyWrapper privateKeyWrapper)
+HandleRetWrapper PrivateKeyWrapperSerialize(PrivateKeyWrapper privateKeyWrapper)
 {
-    bls::PrivateKey *key =
-        reinterpret_cast<bls::PrivateKey *>(privateKeyWrapper);
-    auto sigBytes = (*key).Serialize();
-    return BytesWrapperInit(sigBytes.data(), sigBytes.size());
+    HandleRetWrapper ret = {0};
+    try {
+        bls::PrivateKey *key =
+            reinterpret_cast<bls::PrivateKey *>(privateKeyWrapper);
+        std::vector<uint8_t> sigBytes = (*key).Serialize();
+        ret.handle = BytesWrapperInit(sigBytes.data(), sigBytes.size());
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
 
 HandleRetWrapper PrivateKeyWrapperGetG1Element(

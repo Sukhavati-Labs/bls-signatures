@@ -48,7 +48,7 @@ HandleRetWrapper PrivateKeyWrapperMulG2Element(
     PrivateKeyWrapper privateKeyWrapper,
     BytesWrapper g2ElementWrapper);
 
-BytesWrapper PrivateKeyWrapperSerialize(PrivateKeyWrapper privateKeyWrapper);
+HandleRetWrapper PrivateKeyWrapperSerialize(PrivateKeyWrapper privateKeyWrapper);
 
 HandleRetWrapper PrivateKeyWrapperGetG1Element(
     PrivateKeyWrapper privateKeyWrapper);

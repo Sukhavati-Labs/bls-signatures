@@ -123,6 +123,23 @@ type PrivateKey struct {
 	isZeroValue bool
 }
 
+func newPrivateKeyFromCWrapper(instance C.PrivateKeyWrapper) (*PrivateKey, error) {
+	zero, err := privateKeyIsZero(instance)
+	if err != nil {
+		return nil, err
+	}
+	serialize, err := privateKeyWrapperSerialize(instance)
+	if err != nil {
+		return nil, err
+	}
+	privateKey := &PrivateKey{
+		instance:    instance,
+		isZeroValue: zero,
+	}
+	copy(privateKey.data[:], serialize)
+	return privateKey, nil
+}
+
 func NewPrivateKeyFromBytes(bytes []byte) (*PrivateKey, error) {
 	if len(bytes) != PrivateKeySize {
 		return nil, ErrInvalidPrivateKeyLength
@@ -176,10 +193,17 @@ func (sk *PrivateKey) cWrapper() C.PrivateKeyWrapper {
 	return sk.instance
 }
 
+func privateKeyWrapperSerialize(instance C.PrivateKeyWrapper) ([]byte, error) {
+	ret := C.PrivateKeyWrapperSerialize(instance)
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	buffer := newBytesBufferFromBytesWrapper((C.BytesWrapper)(ret.handle))
+	return buffer.Bytes(), nil
+}
+
 func (sk *PrivateKey) Bytes() []byte {
-	//b := C.PrivateKeyWrapperSerialize(sk.instance)
-	//buffer := newBytesBufferFromBytesWrapper(b)
-	//copy(sk.data,buffer.Bytes())
 	return sk.data[:]
 }
 
@@ -254,8 +278,9 @@ func PrivateKeyAggregate(privateKeys []*PrivateKey) (*PrivateKey, error) {
 		defer C.free(unsafe.Pointer(ret.err))
 		return nil, fmt.Errorf(C.GoString(ret.err))
 	}
-	privateKey := &PrivateKey{
-		instance: (C.PrivateKeyWrapper)(ret.handle),
+	privateKey, err := newPrivateKeyFromCWrapper((C.PrivateKeyWrapper)(ret.handle))
+	if err != nil {
+		return nil, err
 	}
 	return privateKey, nil
 }
@@ -493,9 +518,11 @@ func (bs *BasicSchemeMPL) DeriveChildSk(privateKey *PrivateKey, index uint32) (*
 		return nil, fmt.Errorf(C.GoString(ret.err))
 	}
 	sk := (C.PrivateKeyWrapper)(ret.handle)
-	return &PrivateKey{
-		instance: sk,
-	}, nil
+	privateKey, err := newPrivateKeyFromCWrapper(sk)
+	if err != nil {
+		return nil, err
+	}
+	return privateKey, nil
 }
 
 func (bs *BasicSchemeMPL) DeriveChildSkUnhardened(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
@@ -505,9 +532,11 @@ func (bs *BasicSchemeMPL) DeriveChildSkUnhardened(privateKey *PrivateKey, index 
 		return nil, fmt.Errorf(C.GoString(ret.err))
 	}
 	sk := (C.PrivateKeyWrapper)(ret.handle)
-	return &PrivateKey{
-		instance: sk,
-	}, nil
+	privateKey, err := newPrivateKeyFromCWrapper(sk)
+	if err != nil {
+		return nil, err
+	}
+	return privateKey, nil
 }
 
 func (bs *BasicSchemeMPL) DeriveChildPkUnhardened(publicKey *G1Element, index uint32) (*G1Element, error) {
@@ -572,9 +601,10 @@ func (bs *BasicSchemeMPL) KeyGen(seed []byte) (*PrivateKey, error) {
 		defer C.free(unsafe.Pointer(ret.err))
 		return nil, fmt.Errorf(C.GoString(ret.err))
 	}
-	var privateKeyWrapper = (C.PrivateKeyWrapper)(ret.handle)
-	privateKey := &PrivateKey{
-		instance: privateKeyWrapper,
+	privateKeyWrapper := (C.PrivateKeyWrapper)(ret.handle)
+	privateKey, err := newPrivateKeyFromCWrapper(privateKeyWrapper)
+	if err != nil {
+		return nil, err
 	}
 	return privateKey, nil
 }
@@ -603,9 +633,10 @@ func (a AugSchemeMPL) KeyGen(seed []byte) (*PrivateKey, error) {
 		defer C.free(unsafe.Pointer(ret.err))
 		return nil, fmt.Errorf(C.GoString(ret.err))
 	}
-	var privateKeyWrapper = (C.PrivateKeyWrapper)(ret.handle)
-	 privateKey := &PrivateKey{
-		instance: privateKeyWrapper,
+	privateKeyWrapper := (C.PrivateKeyWrapper)(ret.handle)
+	privateKey, err := newPrivateKeyFromCWrapper(privateKeyWrapper)
+	if err != nil {
+		return nil, err
 	}
 	return privateKey, nil
 }
@@ -734,9 +765,11 @@ func (a AugSchemeMPL) DeriveChildSk(privateKey *PrivateKey, index uint32) (*Priv
 		defer C.free(unsafe.Pointer(ret.err))
 		return nil, fmt.Errorf(C.GoString(ret.err))
 	}
-	return &PrivateKey{
-		instance: (C.PrivateKeyWrapper)(ret.handle),
-	}, nil
+	privateKey, err := newPrivateKeyFromCWrapper((C.PrivateKeyWrapper)(ret.handle))
+	if err != nil {
+		return nil, err
+	}
+	return privateKey, nil
 }
 
 func (a AugSchemeMPL) DeriveChildSkUnhardened(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
@@ -746,9 +779,11 @@ func (a AugSchemeMPL) DeriveChildSkUnhardened(privateKey *PrivateKey, index uint
 		return nil, fmt.Errorf(C.GoString(ret.err))
 	}
 	sk := (C.PrivateKeyWrapper)(ret.handle)
-	return &PrivateKey{
-		instance: sk,
-	}, nil
+	privateKey, err := newPrivateKeyFromCWrapper(sk)
+	if err != nil {
+		return nil, err
+	}
+	return privateKey, nil
 }
 
 func (a AugSchemeMPL) DeriveChildPkUnhardened(publicKey *G1Element, index uint32) (*G1Element, error) {
@@ -787,8 +822,9 @@ func (p PopSchemeMPL) KeyGen(seed []byte) (*PrivateKey, error) {
 		return nil, fmt.Errorf(C.GoString(ret.err))
 	}
 	privateKeyWrapper := (C.PrivateKeyWrapper)(ret.handle)
-	privateKey := &PrivateKey{
-		instance: privateKeyWrapper,
+	privateKey, err := newPrivateKeyFromCWrapper(privateKeyWrapper)
+	if err != nil {
+		return nil, err
 	}
 	return privateKey, nil
 }
