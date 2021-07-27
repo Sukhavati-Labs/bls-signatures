@@ -164,7 +164,7 @@ IntRetWrapper PopSchemeMPLWrapperVerify(
     size_t size,
     BytesWrapper signatureBytes);
 
-BytesWrapper PopSchemeMPLWrapperAggregateG1Element(
+HandleRetWrapper PopSchemeMPLWrapperAggregateG1Element(
     PopSchemeMPLWrapper popScheme,
     const BytesWrapper* publicKeys,
     int num);
