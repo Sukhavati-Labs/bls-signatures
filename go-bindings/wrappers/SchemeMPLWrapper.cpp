@@ -206,17 +206,23 @@ HandleRetWrapper BasicSchemeMPLDeriveChildSkUnhardened(
     return ret;
 }
 
-BytesWrapper BasicSchemeMPLDeriveChildPkUnhardened(
+HandleRetWrapper BasicSchemeMPLDeriveChildPkUnhardened(
     BasicSchemeMPLWrapper basicScheme,
     BytesWrapper master,
     uint32_t index)
 {
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
-    bls::G1Element *masterPublicKey = (bls::G1Element *)master;
-    bls::G1Element childPk =
-        (*basicSchemeMpl).DeriveChildPkUnhardened(*masterPublicKey, index);
-    std::vector<uint8_t> pk = childPk.Serialize();
-    return BytesWrapperInit(pk.data(), pk.size());
+    HandleRetWrapper ret = {0};
+    try {
+        bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
+        bls::G1Element *masterPublicKey = (bls::G1Element *)master;
+        bls::G1Element childPk =
+            (*basicSchemeMpl).DeriveChildPkUnhardened(*masterPublicKey, index);
+        std::vector<uint8_t> pk = childPk.Serialize();
+        ret.handle = BytesWrapperInit(pk.data(), pk.size());
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
 
 AugSchemeMPLWrapper AugSchemeMPLWrapperInit()
@@ -225,16 +231,22 @@ AugSchemeMPLWrapper AugSchemeMPLWrapperInit()
     return (AugSchemeMPLWrapper)(augSchemeMpl);
 }
 
-PrivateKeyWrapper AugSchemeMPLWrapperKeyGen(
+HandleRetWrapper AugSchemeMPLWrapperKeyGen(
     AugSchemeMPLWrapper augScheme,
     const uint8_t *seed,
     size_t size)
 {
-    bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
-    std::vector<uint8_t> keySeed(seed, seed + size);
-    bls::PrivateKey *privateKey =
-        new bls::PrivateKey(augSchemeMpl->KeyGen(keySeed));
-    return (PrivateKeyWrapper)(privateKey);
+    HandleRetWrapper ret = {0};
+    try{
+        bls::AugSchemeMPL *augSchemeMpl = (bls::AugSchemeMPL *)augScheme;
+        std::vector<uint8_t> keySeed(seed, seed + size);
+        bls::PrivateKey *privateKey =
+            new bls::PrivateKey(augSchemeMpl->KeyGen(keySeed));
+        ret.handle= (PrivateKeyWrapper)(privateKey);
+    } catch (std::exception &e) {
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
 
 BytesWrapper AugSchemeMPLWrapperSign(

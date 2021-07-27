@@ -62,7 +62,7 @@ HandleRetWrapper BasicSchemeMPLDeriveChildSkUnhardened(
     PrivateKeyWrapper master,
     uint32_t index);
 
-BytesWrapper BasicSchemeMPLDeriveChildPkUnhardened(
+HandleRetWrapper BasicSchemeMPLDeriveChildPkUnhardened(
     BasicSchemeMPLWrapper basicScheme,
     BytesWrapper master,
     uint32_t index);
@@ -84,7 +84,7 @@ typedef void* AugSchemeMPLWrapper;
 
 AugSchemeMPLWrapper AugSchemeMPLWrapperInit();
 
-PrivateKeyWrapper AugSchemeMPLWrapperKeyGen(
+HandleRetWrapper AugSchemeMPLWrapperKeyGen(
     AugSchemeMPLWrapper augScheme,
     const uint8_t* seed,
     size_t size);

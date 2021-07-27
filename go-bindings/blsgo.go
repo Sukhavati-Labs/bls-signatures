@@ -511,8 +511,13 @@ func (bs *BasicSchemeMPL) DeriveChildSkUnhardened(privateKey *PrivateKey, index 
 }
 
 func (bs *BasicSchemeMPL) DeriveChildPkUnhardened(publicKey *G1Element, index uint32) (*G1Element, error) {
-	b := C.BasicSchemeMPLDeriveChildPkUnhardened(bs.instance, publicKey.cWrapper(), C.uint32_t(index))
-	wrapper := newBytesBufferFromBytesWrapper(b)
+	ret := C.BasicSchemeMPLDeriveChildPkUnhardened(bs.instance, publicKey.cWrapper(), C.uint32_t(index))
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	pubKey := (C.BytesWrapper)(ret.handle)
+	wrapper := newBytesBufferFromBytesWrapper(pubKey)
 	return newG1ElementFromBytesBuffer(wrapper)
 }
 
@@ -590,11 +595,16 @@ func NewAugSchemeMPL() *AugSchemeMPL {
 func (a AugSchemeMPL) KeyGen(seed []byte) (*PrivateKey, error) {
 	cBuffer, size := bytesToCUint8Bytes(seed)
 	defer C.free(unsafe.Pointer(cBuffer))
-	if size < 32 {
-		return nil, fmt.Errorf("seed size must >= 32")
+	if size < SeedMinSize {
+		return nil, ErrInvalidSeedLength
 	}
-	var privateKeyWrapper C.PrivateKeyWrapper = C.AugSchemeMPLWrapperKeyGen(a.instance, cBuffer, C.size_t(size))
-	privateKey := &PrivateKey{
+	ret := C.AugSchemeMPLWrapperKeyGen(a.instance, cBuffer, C.size_t(size))
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	var privateKeyWrapper = (C.PrivateKeyWrapper)(ret.handle)
+	 privateKey := &PrivateKey{
 		instance: privateKeyWrapper,
 	}
 	return privateKey, nil
