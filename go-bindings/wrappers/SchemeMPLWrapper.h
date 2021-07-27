@@ -89,7 +89,7 @@ HandleRetWrapper AugSchemeMPLWrapperKeyGen(
     const uint8_t* seed,
     size_t size);
 
-BytesWrapper AugSchemeMPLWrapperSign(
+HandleRetWrapper AugSchemeMPLWrapperSign(
     AugSchemeMPLWrapper augScheme,
     PrivateKeyWrapper privateKeyWrapper,
     const uint8_t* message,

@@ -632,7 +632,12 @@ func (a AugSchemeMPL) SkToG1(privateKey *PrivateKey) (*G1Element, error) {
 func (a AugSchemeMPL) Sign(privateKey *PrivateKey, message []byte) (signature *G2Element, err error) {
 	cBuffer, size := bytesToCUint8Bytes(message)
 	defer C.free(unsafe.Pointer(cBuffer))
-	sig := C.AugSchemeMPLWrapperSign(a.instance, privateKey.instance, cBuffer, size)
+	ret := C.AugSchemeMPLWrapperSign(a.instance, privateKey.instance, cBuffer, size)
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	sig := (C.BytesWrapper)(ret.handle)
 	data := newBytesBufferFromBytesWrapper(sig)
 	return newG2ElementFromBytesBuffer(data)
 }
