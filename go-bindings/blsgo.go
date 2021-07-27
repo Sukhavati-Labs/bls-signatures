@@ -971,8 +971,13 @@ func (p PopSchemeMPL) DeriveChildPkUnhardened(publicKey *G1Element, index uint32
 }
 
 func (p PopSchemeMPL) PopProve(privateKey *PrivateKey) (*G2Element, error) {
-	b := C.PopSchemeMPLPopProve(p.instance, privateKey.instance)
-	wrapper := newBytesBufferFromBytesWrapper(b)
+	ret := C.PopSchemeMPLPopProve(p.instance, privateKey.instance)
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+
+	}
+	wrapper := newBytesBufferFromBytesWrapper((C.BytesWrapper)(ret.handle))
 	return newG2ElementFromBytesBuffer(wrapper)
 }
 

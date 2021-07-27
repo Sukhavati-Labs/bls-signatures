@@ -197,7 +197,7 @@ HandleRetWrapper PopSchemeMPLDeriveChildPkUnhardened(
     BytesWrapper master,
     uint32_t index);
 
-BytesWrapper PopSchemeMPLPopProve(
+HandleRetWrapper PopSchemeMPLPopProve(
     PopSchemeMPLWrapper popScheme,
     PrivateKeyWrapper privateKey);
 
