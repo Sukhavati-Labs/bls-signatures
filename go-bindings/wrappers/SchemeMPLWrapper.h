@@ -169,7 +169,7 @@ HandleRetWrapper PopSchemeMPLWrapperAggregateG1Element(
     const BytesWrapper* publicKeys,
     int num);
 
-BytesWrapper PopSchemeMPLWrapperAggregateG2Element(
+HandleRetWrapper PopSchemeMPLWrapperAggregateG2Element(
     PopSchemeMPLWrapper popScheme,
     const BytesWrapper* signatures,
     int num);
