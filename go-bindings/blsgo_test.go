@@ -64,11 +64,7 @@ func TestBasicSchemeMPL_KeyGen(t *testing.T) {
 	if err != nil {
 		t.FailNow()
 	}
-	ok, err := privateKey.IsZero()
-	if err != nil {
-		t.FailNow()
-	}
-	if ok {
+	if privateKey.IsZero() {
 		t.Errorf("privateKey is zero ")
 	}
 	t.Log("privateKey:", privateKey.String())
@@ -410,11 +406,7 @@ func TestAugSchemeMPL_KeyGen(t *testing.T) {
 	if err != nil {
 		t.FailNow()
 	}
-	ok, err := privateKey.IsZero()
-	if err != nil {
-		t.FailNow()
-	}
-	if ok {
+	if privateKey.IsZero() {
 		t.Errorf("privateKey is zero ")
 	}
 	t.Log("TestAugSchemeMPL privateKey:", privateKey.String())

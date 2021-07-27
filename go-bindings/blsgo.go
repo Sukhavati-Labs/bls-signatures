@@ -115,7 +115,9 @@ func (b *bytesBuffer) String() string {
 
 // PrivateKey private key secret key
 type PrivateKey struct {
-	instance C.PrivateKeyWrapper
+	instance    C.PrivateKeyWrapper
+	data        [PrivateKeySize]byte
+	isZeroValue bool
 }
 
 func NewPrivateKeyFromBytes(bytes []byte) (*PrivateKey, error) {
@@ -129,8 +131,17 @@ func NewPrivateKeyFromBytes(bytes []byte) (*PrivateKey, error) {
 		defer C.free(unsafe.Pointer(ret.err))
 		return nil, fmt.Errorf(C.GoString(ret.err))
 	}
+	instance := (C.PrivateKeyWrapper)(ret.handle)
+	zero, err := privateKeyIsZero(instance)
+	if err != nil {
+		return nil, err
+	}
+	var data [PrivateKeySize]byte
+	copy(data[:], bytes)
 	privateKey := &PrivateKey{
-		instance: (C.PrivateKeyWrapper)(ret.handle),
+		instance:    instance,
+		isZeroValue: zero,
+		data:        data,
 	}
 	return privateKey, nil
 }
@@ -145,8 +156,8 @@ func (sk *PrivateKey) GetG2Power(g2 *G2Element) (*G2Element, error) {
 	return newG2ElementFromBytesBuffer(bs)
 }
 
-func (sk *PrivateKey) IsZero() (bool, error) {
-	ret := C.PrivateKeyWrapperIsZero(sk.instance)
+func privateKeyIsZero(instance C.PrivateKeyWrapper) (bool, error) {
+	ret := C.PrivateKeyWrapperIsZero(instance)
 	if ret.err != nil {
 		defer C.free(unsafe.Pointer(ret.err))
 		return false, fmt.Errorf(C.GoString(ret.err))
@@ -154,14 +165,19 @@ func (sk *PrivateKey) IsZero() (bool, error) {
 	return ret.ret == 1, nil
 }
 
+func (sk *PrivateKey) IsZero() bool {
+	return sk.isZeroValue
+}
+
 func (sk *PrivateKey) cWrapper() C.PrivateKeyWrapper {
 	return sk.instance
 }
 
 func (sk *PrivateKey) Bytes() []byte {
-	b := C.PrivateKeyWrapperSerialize(sk.instance)
-	buffer := newBytesBufferFromBytesWrapper(b)
-	return buffer.Bytes()
+	//b := C.PrivateKeyWrapperSerialize(sk.instance)
+	//buffer := newBytesBufferFromBytesWrapper(b)
+	//copy(sk.data,buffer.Bytes())
+	return sk.data[:]
 }
 
 func (sk *PrivateKey) Equals(other *PrivateKey) (bool, error) {
@@ -173,6 +189,7 @@ func (sk *PrivateKey) Equals(other *PrivateKey) (bool, error) {
 	}
 	ret := C.PrivateKeyWrapperEquals(sk.instance, other.instance)
 	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
 		return false, fmt.Errorf(C.GoString(ret.err))
 	}
 	if ret.ret > 0 {
@@ -287,7 +304,7 @@ func (g1 *G1Element) Add(addend *G1Element) (*G1Element, error) {
 		defer C.free(unsafe.Pointer(ret.err))
 		return nil, fmt.Errorf(C.GoString(ret.err))
 	}
-	wrapper := newBytesBufferFromBytesWrapper(ret.handle)
+	wrapper := newBytesBufferFromBytesWrapper((C.BytesWrapper)(ret.handle))
 	return newG1ElementFromBytesBuffer(wrapper)
 }
 
