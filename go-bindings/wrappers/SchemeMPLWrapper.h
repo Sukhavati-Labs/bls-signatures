@@ -52,7 +52,7 @@ IntRetWrapper BasicSchemeMPLWrapperAggregateVerify(
     int msgNum,
     const BytesWrapper signature);
 
-PrivateKeyWrapper BasicSchemeMPLDeriveChildSk(
+HandleRetWrapper BasicSchemeMPLDeriveChildSk(
     BasicSchemeMPLWrapper basicScheme,
     PrivateKeyWrapper master,
     uint32_t index);
