@@ -282,7 +282,12 @@ func (g1 *G1Element) IsEqual(element *G1Element) bool {
 }
 
 func (g1 *G1Element) Add(addend *G1Element) (*G1Element, error) {
-	wrapper := newBytesBufferFromBytesWrapper(C.G1ElementAdd(g1.cWrapper(), addend.cWrapper()))
+	ret := C.G1ElementAdd(g1.cWrapper(), addend.cWrapper())
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	wrapper := newBytesBufferFromBytesWrapper(ret.handle)
 	return newG1ElementFromBytesBuffer(wrapper)
 }
 

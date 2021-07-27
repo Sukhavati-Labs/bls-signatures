@@ -46,16 +46,22 @@ Uint32RetWrapper G1ElementGetFingerprint(BytesWrapper publicKeyWrapper)
     return ret;
 }
 
-BytesWrapper G1ElementAdd(
+HandleRetWrapper G1ElementAdd(
     BytesWrapper publicKeyWrapper,
     BytesWrapper publicKeyAddendWrapper)
 {
-    bls::Bytes *b = reinterpret_cast<bls::Bytes *>(publicKeyWrapper);
-    bls::Bytes *bAddend =
-        reinterpret_cast<bls::Bytes *>(publicKeyAddendWrapper);
-    bls::G1Element g1 = bls::G1Element::FromBytes(*b);
-    bls::G1Element g1Addend = bls::G1Element::FromBytes(*bAddend);
-    bls::G1Element g1ret = g1 + g1Addend;
-    std::vector<uint8_t> ret = g1ret.Serialize();
-    return BytesWrapperInit(ret.data(), ret.size());
+    HandleRetWrapper ret = {0};
+    try {
+        bls::Bytes *b = reinterpret_cast<bls::Bytes *>(publicKeyWrapper);
+        bls::Bytes *bAddend =
+            reinterpret_cast<bls::Bytes *>(publicKeyAddendWrapper);
+        bls::G1Element g1 = bls::G1Element::FromBytes(*b);
+        bls::G1Element g1Addend = bls::G1Element::FromBytes(*bAddend);
+        bls::G1Element g1ret = g1 + g1Addend;
+        std::vector<uint8_t> ser = g1ret.Serialize();
+        ret.handle = BytesWrapperInit(ser.data(), ser.size());
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
