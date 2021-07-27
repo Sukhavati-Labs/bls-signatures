@@ -935,10 +935,16 @@ func (p PopSchemeMPL) AggregateVerify(publicKeys []*G1Element, messages [][]byte
 }
 
 func (p PopSchemeMPL) DeriveChildSk(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
-	sk := C.PopSchemeMPLDeriveChildSk(p.instance, privateKey.instance, C.uint(index))
-	return &PrivateKey{
-		instance: sk,
-	}, nil
+	ret := C.PopSchemeMPLDeriveChildSk(p.instance, privateKey.instance, C.uint(index))
+	if ret.err != nil{
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	privateKey, err := newPrivateKeyFromCWrapper((C.PrivateKeyWrapper)(ret.handle))
+	if err != nil{
+		return nil, err
+	}
+	return privateKey, nil
 }
 
 func (p PopSchemeMPL) DeriveChildSkUnhardened(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
