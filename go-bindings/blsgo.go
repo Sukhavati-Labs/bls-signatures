@@ -730,7 +730,12 @@ func (a AugSchemeMPL) DeriveChildSk(privateKey *PrivateKey, index uint32) (*Priv
 }
 
 func (a AugSchemeMPL) DeriveChildSkUnhardened(privateKey *PrivateKey, index uint32) (*PrivateKey, error) {
-	sk := C.AugSchemeMPLDeriveChildSkUnhardened(a.instance, privateKey.instance, C.uint32_t(index))
+	ret := C.AugSchemeMPLDeriveChildSkUnhardened(a.instance, privateKey.instance, C.uint32_t(index))
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	sk := (C.PrivateKeyWrapper)(ret.handle)
 	return &PrivateKey{
 		instance: sk,
 	}, nil

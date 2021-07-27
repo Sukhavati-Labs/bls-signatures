@@ -132,7 +132,7 @@ HandleRetWrapper AugSchemeMPLDeriveChildSk(
     PrivateKeyWrapper master,
     uint32_t index);
 
-PrivateKeyWrapper AugSchemeMPLDeriveChildSkUnhardened(
+HandleRetWrapper AugSchemeMPLDeriveChildSkUnhardened(
     AugSchemeMPLWrapper augScheme,
     PrivateKeyWrapper master,
     uint32_t index);
