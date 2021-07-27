@@ -525,7 +525,12 @@ func (bs *BasicSchemeMPL) Aggregate(publicKeys []*G1Element) (*G1Element, error)
 func (bs *BasicSchemeMPL) Sign(privateKey *PrivateKey, message []byte) (*G2Element, error) {
 	cBuffer, size := bytesToCUint8Bytes(message)
 	defer C.free(unsafe.Pointer(cBuffer))
-	sig := C.BasicSchemeMPLWrapperSign(bs.instance, privateKey.instance, cBuffer, size)
+	ret := C.BasicSchemeMPLWrapperSign(bs.instance, privateKey.instance, cBuffer, size)
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	sig := (C.BytesWrapper)(ret.handle)
 	data := newBytesBufferFromBytesWrapper(sig)
 	return newG2ElementFromBytesBuffer(data)
 }
