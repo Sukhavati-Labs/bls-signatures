@@ -605,17 +605,23 @@ IntRetWrapper PopSchemeMPLWrapperAggregateVerify(
     return ret;
 }
 
-PrivateKeyWrapper PopSchemeMPLDeriveChildSk(
+HandleRetWrapper PopSchemeMPLDeriveChildSk(
     PopSchemeMPLWrapper popScheme,
     PrivateKeyWrapper master,
     uint32_t index)
 {
-    bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
-    bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
-    bls::PrivateKey childSk =
-        (*popSchemeMpl).DeriveChildSk(*masterPrivateKey, index);
-    bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
-    return (void *)(childPrivateKey);
+    HandleRetWrapper ret = {0};
+    try{
+        bls::PopSchemeMPL *popSchemeMpl = (bls::PopSchemeMPL *)popScheme;
+        bls::PrivateKey *masterPrivateKey = (bls::PrivateKey *)master;
+        bls::PrivateKey childSk =
+            (*popSchemeMpl).DeriveChildSk(*masterPrivateKey, index);
+        bls::PrivateKey *childPrivateKey = new bls::PrivateKey(childSk);
+        ret.handle = (PrivateKeyWrapper)(childPrivateKey);
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
+    }
+    return ret;
 }
 
 PrivateKeyWrapper PopSchemeMPLDeriveChildSkUnhardened(

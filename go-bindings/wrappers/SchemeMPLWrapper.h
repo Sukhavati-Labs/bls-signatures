@@ -182,7 +182,7 @@ IntRetWrapper PopSchemeMPLWrapperAggregateVerify(
     int msgNum,
     const BytesWrapper signature);
 
-PrivateKeyWrapper PopSchemeMPLDeriveChildSk(
+HandleRetWrapper PopSchemeMPLDeriveChildSk(
     PopSchemeMPLWrapper popScheme,
     PrivateKeyWrapper master,
     uint32_t index);
