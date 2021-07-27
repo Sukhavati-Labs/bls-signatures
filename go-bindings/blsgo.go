@@ -658,8 +658,12 @@ func (a AugSchemeMPL) PrependingSign(privateKey *PrivateKey, message []byte, pub
 func (a AugSchemeMPL) Verify(publicKey *G1Element, message []byte, signature *G2Element) (bool, error) {
 	cBuffer, size := bytesToCUint8Bytes(message)
 	defer C.free(unsafe.Pointer(cBuffer))
-	ok := C.AugSchemeMPLWrapperVerify(a.instance, publicKey.cWrapper(), cBuffer, size, signature.cWrapper())
-	return ok > 0, nil
+	ret := C.AugSchemeMPLWrapperVerify(a.instance, publicKey.cWrapper(), cBuffer, size, signature.cWrapper())
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return false, fmt.Errorf(C.GoString(ret.err))
+	}
+	return ret.ret > 0, nil
 }
 
 func (a AugSchemeMPL) AggregateSignatures(signatures []*G2Element) (*G2Element, error) {
