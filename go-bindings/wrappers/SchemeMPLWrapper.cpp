@@ -64,21 +64,27 @@ HandleRetWrapper BasicSchemeMPLWrapperAggregateG2Element(
     return ret;
 }
 
-BytesWrapper BasicSchemeMPLWrapperAggregateG1Element(
+HandleRetWrapper BasicSchemeMPLWrapperAggregateG1Element(
     BasicSchemeMPLWrapper basicScheme,
     const BytesWrapper *publicKeys,
     int num)
 {
-    bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
-    std::vector<bls::G1Element> pubKeys;
-    for (int i = 0; i < num; i++) {
-        bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
-        bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
-        pubKeys.push_back(g1);
+    HandleRetWrapper ret = {0};
+    try {
+        bls::BasicSchemeMPL *basicSchemeMpl = (bls::BasicSchemeMPL *)basicScheme;
+        std::vector<bls::G1Element> pubKeys;
+        for (int i = 0; i < num; i++) {
+            bls::Bytes *bytes = (bls::Bytes *)(publicKeys[i]);
+            bls::G1Element g1 = bls::G1Element::FromBytes(*bytes);
+            pubKeys.push_back(g1);
+        }
+        bls::G1Element augG1 = (*basicSchemeMpl).Aggregate(pubKeys);
+        std::vector<uint8_t> g1 = augG1.Serialize();
+        ret.handle = BytesWrapperInit(g1.data(), g1.size());
+    }catch (std::exception &e){
+        ret.err = strdup(e.what());
     }
-    bls::G1Element augG1 = (*basicSchemeMpl).Aggregate(pubKeys);
-    std::vector<uint8_t> g1 = augG1.Serialize();
-    return BytesWrapperInit(g1.data(), g1.size());
+    return ret;
 }
 
 int BasicSchemeMPLWrapperAggregateVerify(
