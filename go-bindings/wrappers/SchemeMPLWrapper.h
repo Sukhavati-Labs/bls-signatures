@@ -34,7 +34,7 @@ HandleRetWrapper BasicSchemeMPLWrapperKeyGen(
 
 BytesWrapper BasicSchemeMPLWrapperSkToPk();
 
-BytesWrapper BasicSchemeMPLWrapperAggregateG1Element(
+HandleRetWrapper BasicSchemeMPLWrapperAggregateG1Element(
     BasicSchemeMPLWrapper basicScheme,
     const BytesWrapper* publicKeys,
     int num);
