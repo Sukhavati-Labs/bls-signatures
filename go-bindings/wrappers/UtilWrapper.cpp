@@ -14,17 +14,19 @@
 
 #include "UtilWrapper.h"
 #include "BytesWrapper.h"
-#include "../../src/util.hpp"
+#include "../../src/bls.hpp"
 
-HandleRetWrapper Hash256(const uint8_t *message, const size_t messageSize){
-    uint8_t hash[32];
-    HandleRetWrapper ret;
+
+using namespace bls;
+
+HandleRetWrapper Hash256(const uint8_t *message,size_t messageSize){
+    uint8_t digest[HDKeys::HASH_LEN];
+    HandleRetWrapper ret = {0};
     try {
-        bls::Util::Hash256(hash, message, messageSize);
+        Util::Hash256(digest, message, messageSize);
+        ret.handle = reinterpret_cast<void *>(BytesWrapperInit(digest,HDKeys::HASH_LEN));
     }catch (std::exception &e){
         ret.err = strdup(e.what());
-        return ret;
     }
-    ret.handle = reinterpret_cast<void *>(BytesWrapperInit(hash,32));
     return ret;
 }

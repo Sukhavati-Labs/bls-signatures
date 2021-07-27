@@ -14,7 +14,7 @@ package blsgo
 #cgo LDFLAGS: -L ../build
 #cgo LDFLAGS: -L ../build/src
 #cgo LDFLAGS: -L ../build/go-bindings
-#cgo LDFLAGS: -lstdc++ -lbls -lblstmp -lblsgo -lrelic_s
+#cgo LDFLAGS: -lrelic_s -lstdc++ -lblsgo -lbls
 #include "gobindings.h"
 #include <stdlib.h>
 */
@@ -820,15 +820,15 @@ func ParentSkToLamportPK(parentSk *PrivateKey, index uint32) []byte {
 }
 
 func Hash256(message []byte) ([Hash256Size]byte, error) {
-	size := len(message)
 	var sha [Hash256Size]byte
-	cBuffer := (*C.uint8_t)(C.CBytes(message))
+	cBuffer, size := bytesToCUint8Bytes(message)
 	ret := C.Hash256(cBuffer, size)
 	if ret.err != nil {
 		defer C.free(unsafe.Pointer(ret.err))
-		return sha, fmt.Errorf(ret.err)
+		err := C.GoString(ret.err)
+		return sha, fmt.Errorf(err)
 	}
-	wrapper := newBytesBufferFromBytesWrapper(ret.handle)
+	wrapper := newBytesBufferFromBytesWrapper((C.BytesWrapper)(ret.handle))
 
 	copy(sha[:], wrapper.Bytes())
 	return sha, nil

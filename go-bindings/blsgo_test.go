@@ -2,6 +2,7 @@ package blsgo
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/hex"
 	"testing"
 )
@@ -425,4 +426,23 @@ func TestAugSchemeMPL_KeyGen(t *testing.T) {
 		t.FailNow()
 	}
 	t.Log("publicKey:", publicKey.String())
+}
+
+func TestHash256(t *testing.T) {
+	message := []byte{1, 2, 3, 4}
+	hash256Bytes, err := Hash256(message)
+	if err != nil {
+		t.FailNow()
+		return
+	}
+	h := sha256.New()
+	h.Write(message)
+	sha256Bytes := h.Sum(nil)
+
+	t.Log("hash256:", hash256Bytes)
+	t.Log("sha256", sha256Bytes)
+	if !bytes.Equal(hash256Bytes[:], sha256Bytes) {
+		t.FailNow()
+	}
+
 }
