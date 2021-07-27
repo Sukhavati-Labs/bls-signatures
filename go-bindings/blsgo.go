@@ -961,8 +961,12 @@ func (p PopSchemeMPL) DeriveChildSkUnhardened(privateKey *PrivateKey, index uint
 }
 
 func (p PopSchemeMPL) DeriveChildPkUnhardened(publicKey *G1Element, index uint32) (*G1Element, error) {
-	b := C.PopSchemeMPLDeriveChildPkUnhardened(p.instance, publicKey.cWrapper(), C.uint32_t(index))
-	wrapper := newBytesBufferFromBytesWrapper(b)
+	ret := C.PopSchemeMPLDeriveChildPkUnhardened(p.instance, publicKey.cWrapper(), C.uint32_t(index))
+	if ret.err != nil {
+		defer C.free(unsafe.Pointer(ret.err))
+		return nil, fmt.Errorf(C.GoString(ret.err))
+	}
+	wrapper := newBytesBufferFromBytesWrapper((C.BytesWrapper)(ret.handle))
 	return newG1ElementFromBytesBuffer(wrapper)
 }
 
