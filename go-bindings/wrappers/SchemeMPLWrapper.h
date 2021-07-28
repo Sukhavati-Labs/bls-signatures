@@ -52,7 +52,7 @@ IntRetWrapper BasicSchemeMPLWrapperAggregateVerify(
     int keyNum,
     const BytesWrapper* messages,
     int msgNum,
-    const BytesWrapper signature);
+    BytesWrapper signature);
 
 HandleRetWrapper BasicSchemeMPLDeriveChildSk(
     BasicSchemeMPLWrapper basicScheme,
@@ -127,7 +127,7 @@ IntRetWrapper AugSchemeMPLWrapperAggregateVerify(
     int keyNum,
     const BytesWrapper* messages,
     int msgNum,
-    const BytesWrapper signature);
+    BytesWrapper signature);
 
 HandleRetWrapper AugSchemeMPLDeriveChildSk(
     AugSchemeMPLWrapper augScheme,
@@ -182,7 +182,7 @@ IntRetWrapper PopSchemeMPLWrapperAggregateVerify(
     int keyNum,
     const BytesWrapper* messages,
     int msgNum,
-    const BytesWrapper signature);
+    BytesWrapper signature);
 
 HandleRetWrapper PopSchemeMPLDeriveChildSk(
     PopSchemeMPLWrapper popScheme,

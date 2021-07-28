@@ -93,7 +93,7 @@ IntRetWrapper BasicSchemeMPLWrapperAggregateVerify(
     int keyNum,
     const BytesWrapper *messages,
     int msgNum,
-    const BytesWrapper signature)
+    BytesWrapper signature)
 {
     IntRetWrapper ret = {0};
     try {
@@ -576,7 +576,7 @@ IntRetWrapper PopSchemeMPLWrapperAggregateVerify(
     int keyNum,
     const BytesWrapper *messages,
     int msgNum,
-    const BytesWrapper signature)
+    BytesWrapper signature)
 {
     IntRetWrapper ret = {0};
     try{
