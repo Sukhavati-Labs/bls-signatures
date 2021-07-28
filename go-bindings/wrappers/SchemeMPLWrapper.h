@@ -32,7 +32,9 @@ HandleRetWrapper BasicSchemeMPLWrapperKeyGen(
     const uint8_t* seed,
     size_t size);
 
-BytesWrapper BasicSchemeMPLWrapperSkToPk();
+HandleRetWrapper BasicSchemeMPLWrapperSkToPk(
+    BasicSchemeMPLWrapper basicScheme,
+    BytesWrapper privateKey);
 
 HandleRetWrapper BasicSchemeMPLWrapperAggregateG1Element(
     BasicSchemeMPLWrapper basicScheme,
