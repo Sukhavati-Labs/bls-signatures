@@ -204,6 +204,9 @@ func privateKeyWrapperSerialize(instance C.PrivateKeyWrapper) ([]byte, error) {
 }
 
 func (sk *PrivateKey) Bytes() []byte {
+	if sk == nil {
+		return nil
+	}
 	return sk.data[:]
 }
 
@@ -319,10 +322,16 @@ func newG1ElementFromBytesBuffer(data *bytesBuffer) (*G1Element, error) {
 }
 
 func (g1 *G1Element) Bytes() []byte {
+	if g1 == nil {
+		return nil
+	}
 	return g1[:]
 }
 
 func (g1 *G1Element) IsEqual(element *G1Element) bool {
+	if g1 == nil || element == nil {
+		return false
+	}
 	return bytes.Equal(g1.Bytes(), element.Bytes())
 }
 
@@ -354,7 +363,7 @@ func (g1 G1Element) GetFingerprint() (uint32, error) {
 }
 
 func (g1 *G1Element) String() string {
-	return hex.EncodeToString(g1[:])
+	return hex.EncodeToString(g1.Bytes())
 }
 
 type G2Element [G2ElementSize]byte
@@ -363,8 +372,8 @@ func NewG2ElementFromBytes(buffer []byte) (*G2Element, error) {
 	if len(buffer) != G2ElementSize {
 		return nil, ErrInvalidG2ElementLength
 	}
-	bytes := newBytesBufferFromBytes(buffer)
-	g2, err := newG2ElementFromBytesBuffer(bytes)
+	bufferFromBytes := newBytesBufferFromBytes(buffer)
+	g2, err := newG2ElementFromBytesBuffer(bufferFromBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -381,6 +390,9 @@ func newG2ElementFromBytesBuffer(data *bytesBuffer) (*G2Element, error) {
 }
 
 func (g2 *G2Element) Bytes() []byte {
+	if g2 == nil {
+		return nil
+	}
 	return g2[:]
 }
 
@@ -393,6 +405,9 @@ func (g2 *G2Element) Size() int {
 }
 
 func (g2 *G2Element) IsEqual(element *G2Element) bool {
+	if g2 == nil || element == nil {
+		return false
+	}
 	return bytes.Equal(g2.Bytes(), element.Bytes())
 }
 
@@ -1034,7 +1049,6 @@ func Hash256(message []byte) ([Hash256Size]byte, error) {
 		return sha, fmt.Errorf(err)
 	}
 	wrapper := newBytesBufferFromBytesWrapper((C.BytesWrapper)(ret.handle))
-
 	copy(sha[:], wrapper.Bytes())
 	return sha, nil
 }
