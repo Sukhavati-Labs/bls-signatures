@@ -2,6 +2,7 @@ package blsgo
 
 import (
 	"bytes"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"testing"
@@ -437,4 +438,75 @@ func TestHash256(t *testing.T) {
 		message = append(message, byte(i))
 	}
 
+}
+
+func TestG1ElementGenerator(t *testing.T) {
+	generator, err := G1ElementGenerator()
+	if err != nil {
+		t.FailNow()
+	}
+	t.Log("g1 element generator:", generator.String())
+}
+
+func TestNewG2ElementFromBytes(t *testing.T) {
+	seed := make([]byte, sha256.Size)
+	_, err := rand.Read(seed)
+	if err != nil {
+		t.FailNow()
+	}
+	augScheme := NewAugSchemeMPL()
+	sk, err := augScheme.KeyGen(seed)
+	if err != nil {
+		t.FailNow()
+	}
+	pk, err := sk.GetG1Element()
+	if err != nil {
+		t.FailNow()
+	}
+	sig, err := augScheme.Sign(sk, seed)
+	if err != nil {
+		t.FailNow()
+	}
+	g2, err := NewG2ElementFromBytes(sig.Bytes())
+	if err != nil {
+		t.FailNow()
+	}
+	if !g2.IsEqual(sig) {
+		t.FailNow()
+	}
+	verify, err := augScheme.Verify(pk, seed, sig)
+	if err != nil {
+		t.FailNow()
+	}
+	if !verify {
+		t.FailNow()
+	}
+}
+
+func TestNewPopSchemeMPL(t *testing.T) {
+	seed := make([]byte, sha256.Size)
+	_, err := rand.Read(seed)
+	if err != nil {
+		t.FailNow()
+	}
+	popScheme := NewPopSchemeMPL()
+	sk, err := popScheme.KeyGen(seed)
+	if err != nil {
+		t.FailNow()
+	}
+	pk, err := sk.GetG1Element()
+	if err != nil {
+		t.FailNow()
+	}
+	sign, err := popScheme.Sign(sk, seed)
+	if err != nil {
+		t.FailNow()
+	}
+	verify, err := popScheme.Verify(pk, seed, sign)
+	if err != nil {
+		t.FailNow()
+	}
+	if !verify {
+		t.FailNow()
+	}
 }
