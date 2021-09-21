@@ -14,7 +14,8 @@ package blsgo
 #cgo LDFLAGS: -L ../build
 #cgo LDFLAGS: -L ../build/src
 #cgo LDFLAGS: -L ../build/go-bindings
-#cgo LDFLAGS: -lrelic_s -lstdc++ -lblsgo -lbls
+#cgo LDFLAGS: -lrelic_s -lblsgo -lbls -lm
+#cgo LDFLAGS: -lstdc++
 #include "gobindings.h"
 #include <stdlib.h>
 */
